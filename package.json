@@ -16,7 +16,8 @@
     "url": ""
   },
   "homepage": "",
-  "devDependencies": {
+  "devDependencies": {},
+  "dependencies": {
     "upper-case": "^2.0.1"
   }
 }
