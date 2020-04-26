@@ -18,6 +18,8 @@
   "homepage": "",
   "devDependencies": {},
   "dependencies": {
+    "express": "^4.15.2",
+    "socket.io": "^2.3.0",
     "upper-case": "^2.0.1"
   }
 }

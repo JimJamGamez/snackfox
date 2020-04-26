@@ -1,17 +1,22 @@
-const http = require('http');
-const port = process.env.PORT || 3000
-var url = require('url');
-var fs = require('fs');
-var uc = require('upper-case'); 
-const server = http.createServer((req, res) => {  
-  fs.readFile('demofile1.html', function(err, data) {
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write(data);
-	res.write(uc.upperCase("Hello World!"));
-    return res.end();
+var app = require('express')();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/demofile1.html');
+});
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+	io.emit('chat message', msg);
   });
 });
 
-server.listen(port,() => {
-  console.log(`Server running at port `+port);
+http.listen(3000, () => {
+  console.log('listening on *:3000');
 });
