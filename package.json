@@ -1,14 +1,22 @@
 {
   "name": "snackfox",
   "version": "1.0.0",
-  "description": "",
+  "description": "node app ",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "devDependencies": {
     "upper-case": "^2.0.1"
   }
 }
