@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+.form-inline {  
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+
+.form-inline label {
+  margin: 5px 10px 5px 0;
+}
+
+.form-inline input {
+  vertical-align: middle;
+  margin: 5px 10px 5px 0;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.form-inline button {
+  padding: 10px 20px;
+  background-color: dodgerblue;
+  border: 1px solid #ddd;
+  color: white;
+  cursor: pointer;
+}
+
+.form-inline button:hover {
+  background-color: royalblue;
+}
+
+@media (max-width: 800px) {
+  .form-inline input {
+    margin: 10px 0;
+  }
+  
+  .form-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
+</head>
+<body>
+
+<h2>Welcome to SnackFox</h2>
+
+<p>From the creators of PhotoJoke & Melvin's Graphs</p>
+
+<form class="form-inline" id="myForm">
+  <label for="name">Name:</label>
+  <input type="name" id="email" placeholder="Enter Name" name="name">
+
+  <button type="submit">Let's go!</button>
+</form>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script>
+document.getElementById("myForm").addEventListener("submit",myFunction);
+function myFunction(){
+	document.getElementById("test").innerHTML = "test2";
+}
+</script>
+</body>
+</html>

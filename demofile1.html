@@ -1,38 +1,152 @@
 <!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
+    <title>SnackFox</title>
+	<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+.form-inline {  
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+
+.form-inline label {
+  margin: 5px 10px 5px 0;
+}
+
+.form-inline input {
+  vertical-align: middle;
+  margin: 5px 10px 5px 0;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.form-inline button {
+  padding: 10px 20px;
+  background-color: dodgerblue;
+  border: 1px solid #ddd;
+  color: white;
+  cursor: pointer;
+}
+
+.form-inline button:hover {
+  background-color: royalblue;
+}
+
+@media (max-width: 800px) {
+  .form-inline input {
+    margin: 10px 0;
+  }
+  
+  .form-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+</style>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form action="">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
+  
+  <p id="playersOnline">test</p>
+  
+  <div id="welcomeScreen">
+	  <h2>Welcome to SnackFox</h2>
+		<p>From the creators of PhotoJoke & Melvin's Graphs</p>
+		<ul id="messages"></ul>
+		<form class="form-inline" id="myForm" action="">
+		  <label for="name">Name:</label>
+		  <input id="m" type="m" id="email" placeholder="Enter Name" name="name">
+
+		  <button type="submit">Let's go!</button>
+		</form>
+	</div>
+	<div id="selectRoomScreen" style='display:none;'>
+		 <h2>Select a room</h2>
+		 <button id="createroom">Create a room</button>
+		 <ul id="rooms"></ul>
+  </div>
+  <div id="lobbyScreen" style='display:none;'>
+    <h2 id="lobbyName">lobbyScreen</h2>
+    <ul id="lobbyPlayers"></ul>
+ </div>
+	
+	
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script>
+var player = {name: "hello",room: ""};
+ var socket = io();
+ players = {};
+
+  function joinRoom(room){
+        console.log("Joined" +room);
+        player.room = unescape(room);
+        socket.emit('update player', JSON.stringify(player));
+        document.getElementById("lobbyScreen").style.display = "";
+        document.getElementById("selectRoomScreen").style.display = "none";
+    }
+  
+
   $(function () {
-    var socket = io();
     $('form').submit(function(e){
       e.preventDefault(); // prevents page reloading
-      socket.emit('chat message', $('#m').val());
-      $('#m').val('');
+      player.name = $('#m').val();
+      document.getElementById("welcomeScreen").style.display = "none";
+      document.getElementById("selectRoomScreen").style.display = "";
+
+      socket.emit('request update');
       return false;
     });
-    socket.on('chat message', function(msg){
-      $('#messages').append($('<li>').text(msg));
+    function updateRooms(rooms){
+      $('#rooms').empty();
+      if (Object.keys(rooms).length == 0){
+        $('#rooms').append("No rooms found, why not create one!");
+      }else{
+        for(var room in rooms){
+          console.log(room);
+          //var text = "<li onClick=joinRoom("hys room")>hys room - 1 players</li>
+         var text = "".concat("<li onClick=joinRoom(\"",escape(room),"\")>",room," - ",Object.keys(rooms[room]).length," players","</li>");
+            console.log(text);
+        
+          $('#rooms').append(text);
+      }
+      }
+    }
+    
+    function updateLobby(rooms){
+      console.log(player);
+      
+      if (player.hasOwnProperty("room")){
+        $('#lobbyName').text(player.room);
+        $('#lobbyPlayers').empty();
+        if (player.room in rooms){
+        for(var p in rooms[player.room]){
+          var text = "<li>" + rooms[player.room][p].name + "" + "</li>"
+          $('#lobbyPlayers').append(text);
+        }
+        }
+    }
+    }
+
+	  socket.on('update players', function(p){
+      document.getElementById("playersOnline").innerHTML = "Players online: " +  p;
+      players = JSON.parse(p);
+      updateRooms(players);
+      updateLobby(players);
+    });
+
+    $("#createroom").click(function(e){
+      var roomName = player.room;
+      player.room = player.name + "'s room"
+      socket.emit('update player', JSON.stringify(player));
+      document.getElementById("lobbyScreen").style.display = "";
+      document.getElementById("selectRoomScreen").style.display = "none";  
     });
   });
+
 </script>
  </body>
 </html>
