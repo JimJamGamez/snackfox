@@ -3,95 +3,297 @@
   <head>
     <title>SnackFox</title>
 	<style>
-body {font-family: Arial, Helvetica, sans-serif;}
-* {box-sizing: border-box;}
 
-.form-inline {  
-  display: flex;
-  flex-flow: row wrap;
-  align-items: center;
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  padding:0;
+  color:#FFFFFF;
+	font-weight:300;
+	font-family:'Roboto',sans-serif;
+	line-height:1.55;
+	overflow-x:hidden;
+}
+@font-face {
+	font-family: 'Roboto';
+	font-style: normal;
+	font-weight: 300;
+	src: url("Roboto-Light.woff") format('woff');
+}
+.bttn{
+	display:inline-block;
+	font-size:1.32em;
+  min-width: 100px;
+	padding:0.3em 0.75em;
+	margin:0.5em 0.8em 0.5em 0;
+	border:0.1em solid #FFFFFF;
+	border-radius:0.12em;
+	transition: all 0.2s;
+	text-decoration:none;
+	font-weight:400;
+  font-size:1.5em;
+}
+.bttn:hover, .bttn:focus, .bttn:active{
+	color:#000000 !important;
+	background-color:#FFFFFF !important;
+	font-weight:400;
+}
+.bg {
+   background-image: linear-gradient(45deg, #6a3093, #a044ff); 
+  height: 100%; 
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+#background{
+	position:fixed;
+	z-index:-1;
+	top:0;
+	left:0;
+	width:100vw;
+	height:100vh;
+	overflow:hidden;
+	background-color:#0f0919;
+}
+#bkFrame{
+  width:100vw;
+	height:100vh;
+}
+@font-face {
+    font-family: 'Lato';
+    src: url('lato-black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Lato';
+    src: url('lato-bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+h1,h2,h3,h4,h5,h6{
+	font-family:'Lato', sans-serif;
+	color:#FFFFFF;
+	margin:1.7em 0 0.5em 0;
+	font-weight:900;
+	line-height:1em;
+	text-transform:uppercase;
+}
+.center {
+  margin: auto;
+  text-align: center;
 }
 
-.form-inline label {
-  margin: 5px 10px 5px 0;
-}
-
-.form-inline input {
-  vertical-align: middle;
-  margin: 5px 10px 5px 0;
-  padding: 10px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
-.form-inline button {
-  padding: 10px 20px;
-  background-color: dodgerblue;
-  border: 1px solid #ddd;
-  color: white;
-  cursor: pointer;
-}
-
-.form-inline button:hover {
-  background-color: royalblue;
-}
-
-@media (max-width: 800px) {
-  .form-inline input {
-    margin: 10px 0;
-  }
-  
-  .form-inline {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
 </style>
   </head>
   <body>
-  
-  <p id="playersOnline">test</p>
-  
+    <script type="text/javascript">window.requestAnimationFrame=window.requestAnimationFrame||(function(callback,element){setTimeout(callback,1000/60);});
+
+      function timeStamp(){
+        if(window.performance.now)return window.performance.now(); else return Date.now();
+      }
+      
+      function isVisible(el){
+        var r = el.getBoundingClientRect();
+        return r.top+r.height >= 0 &&r.left+r.width >= 0 &&r.bottom-r.height <= (window.innerHeight || document.documentElement.clientHeight) && r.right-r.width <= (window.innerWidth || document.documentElement.clientWidth);
+      }
+      
+      function Star(x,y,z){
+        this.x=x;
+        this.y=y;
+        this.z=z;
+        this.size=0.5+Math.random();
+      }
+      
+      function WarpSpeed(targetId,config){
+        this.targetId=targetId;
+        if(WarpSpeed.RUNNING_INSTANCES==undefined)WarpSpeed.RUNNING_INSTANCES={};
+        if(WarpSpeed.RUNNING_INSTANCES[targetId]){WarpSpeed.RUNNING_INSTANCES[targetId].destroy();}
+        config=config||localStorage.warpSpeedConfig||{};
+        if(typeof config == "string")try{config=JSON.parse(config);}catch(e){config={}}
+        this.SPEED=config.speed==undefined||config.speed<0?0.7:config.speed;
+        this.TARGET_SPEED=config.targetSpeed==undefined||config.targetSpeed<0?this.SPEED:config.targetSpeed;
+        this.SPEED_ADJ_FACTOR=config.speedAdjFactor==undefined?0.03:config.speedAdjFactor<0?0:config.speedAdjFactor>1?1:config.speedAdjFactor;
+        this.DENSITY=config.density==undefined||config.density<=0?0.7:config.density;
+        this.USE_CIRCLES=config.shape==undefined?true:config.shape=="circle";
+        this.DEPTH_ALPHA=config.depthFade==undefined?true:config.depthFade;
+        this.WARP_EFFECT=config.warpEffect==undefined?true:config.warpEffect;
+        this.WARP_EFFECT_LENGTH=config.warpEffectLength==undefined?5:config.warpEffectLength<0?0:config.warpEffectLength;
+        this.STAR_SCALE=config.starSize==undefined||config.starSize<=0?3:config.starSize;
+        this.BACKGROUND_COLOR=config.backgroundColor==undefined?"hsl(263,45%,7%)":config.backgroundColor;	
+        this.SPEED_WHILELOADING=config.speedWhileLoading==undefined?18:config.speedWhileLoading;
+        var canvas=document.getElementById(this.targetId);
+        var ctx=canvas.getContext("2d");
+        ctx.fillStyle=this.BACKGROUND_COLOR;
+        ctx.fillRect(0,0,1,1);
+        ctx.fillStyle=config.starColor==undefined?"#FFFFFF":config.starColor;
+        ctx.fillRect(0,0,1,1);
+        var color=ctx.getImageData(0,0,1,1).data;
+        this.STAR_R=color[0]; this.STAR_G=color[1]; this.STAR_B=color[2];
+        this.prevW=-1; this.prevH=-1; //width and height will be set at first draw call
+        this.stars=[];
+        for(var i=0;i<this.DENSITY*1000;i++){
+          this.stars.push(new Star((Math.random()-0.5)*1000,(Math.random()-0.5)*1000,1000*Math.random()));
+        }
+        this.lastMoveTS=timeStamp();
+        this.drawRequest=null;
+        this.LAST_RENDER_T=0;
+        WarpSpeed.RUNNING_INSTANCES[targetId]=this;
+        this.draw();
+      }
+      
+      WarpSpeed.prototype={
+        constructor:WarpSpeed,
+        loadStart:function(){
+          if(this.TARGET_SPEED==this.SPEED_WHILELOADING) return;
+          this._OLDSPEED=this.TARGET_SPEED;
+          this.TARGET_SPEED=this.SPEED_WHILELOADING;
+        },
+        loadDone:function(){
+          this.TARGET_SPEED=this._OLDSPEED;
+        },
+        draw:function(){
+          var TIME=timeStamp();
+          if(!(document.getElementById(this.targetId))){
+            this.destroy();
+            return;
+          }
+          this.move();
+          var canvas=document.getElementById(this.targetId);
+          if(!this.PAUSED&&isVisible(canvas)){
+            if(this.prevW!=canvas.clientWidth||this.prevH!=canvas.clientHeight){
+              canvas.width=(canvas.clientWidth<10?10:canvas.clientWidth)*(window.devicePixelRatio||1);
+              canvas.height=(canvas.clientHeight<10?10:canvas.clientHeight)*(window.devicePixelRatio||1);
+            }
+            this.size=(canvas.height<canvas.width?canvas.height:canvas.width)/(10/(this.STAR_SCALE<=0?0:this.STAR_SCALE));
+            if(this.WARP_EFFECT) this.maxLineWidth=this.size/30;
+            var ctx=canvas.getContext("2d");
+            ctx.fillStyle=this.BACKGROUND_COLOR;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+            var rgb="rgb("+this.STAR_R+","+this.STAR_G+","+this.STAR_B+")", rgba="rgba("+this.STAR_R+","+this.STAR_G+","+this.STAR_B+",";
+            for(var i=0;i<this.stars.length;i++){
+              var s=this.stars[i];
+              var xOnDisplay=s.x/s.z, yOnDisplay=s.y/s.z;
+              if(!this.WARP_EFFECT&&(xOnDisplay<-0.5||xOnDisplay>0.5||yOnDisplay<-0.5||yOnDisplay>0.5))continue;
+              var size=s.size*this.size/s.z;
+              if(size<0.3) continue; //don't draw very small dots
+              if(this.DEPTH_ALPHA){
+                var alpha=(1000-s.z)/1000;
+                ctx.fillStyle=rgba+(alpha>1?1:alpha)+")";
+              }else{
+                ctx.fillStyle=rgb;
+              }
+              if(this.WARP_EFFECT){
+                ctx.beginPath();
+                var x2OnDisplay=s.x/(s.z+this.WARP_EFFECT_LENGTH*this.SPEED), y2OnDisplay=s.y/(s.z+this.WARP_EFFECT_LENGTH*this.SPEED);
+                if(x2OnDisplay<-0.5||x2OnDisplay>0.5||y2OnDisplay<-0.5||y2OnDisplay>0.5)continue;
+                ctx.moveTo(canvas.width*(xOnDisplay+0.5)-size/2,canvas.height*(yOnDisplay+0.5)-size/2);
+                ctx.lineTo(canvas.width*(x2OnDisplay+0.5)-size/2,canvas.height*(y2OnDisplay+0.5)-size/2);
+                ctx.lineWidth=size>this.maxLineWidth?this.maxLineWidth:size;
+                if(this.USE_CIRCLES){ctx.lineCap="round";}else{ctx.lineCap="butt"}
+                ctx.strokeStyle=ctx.fillStyle;
+                ctx.stroke();
+              }else if(this.USE_CIRCLES){
+                ctx.beginPath();
+                ctx.arc(canvas.width*(xOnDisplay+0.5)-size/2,canvas.height*(yOnDisplay+0.5)-size/2,size/2,0,2*Math.PI);
+                ctx.fill();
+              }else{
+                ctx.fillRect(canvas.width*(xOnDisplay+0.5)-size/2,canvas.height*(yOnDisplay+0.5)-size/2,size,size);
+              }
+            }
+            this.prevW=canvas.clientWidth;
+            this.prevH=canvas.clientHeight;
+          }
+          if(this.drawRequest!=-1)this.drawRequest=requestAnimationFrame(this.draw.bind(this));
+          this.LAST_RENDER_T=timeStamp()-TIME;
+        },
+        move:function(){
+          var t=timeStamp(), speedMulF=(t-this.lastMoveTS)/(1000/60);
+          this.lastMoveTS=t;
+          if(this.PAUSED)return;
+          var speedAdjF=Math.pow(this.SPEED_ADJ_FACTOR<0?0:this.SPEED_ADJ_FACTOR>1?1:this.SPEED_ADJ_FACTOR,1/speedMulF);
+          this.SPEED=this.TARGET_SPEED*speedAdjF+this.SPEED*(1-speedAdjF);
+          if(this.SPEED<0)this.SPEED=0;
+          var speed=this.SPEED*speedMulF;
+          for(var i=0;i<this.stars.length;i++){
+            var s=this.stars[i];
+            s.z-=speed;
+            while(s.z<1){
+              s.z+=1000;
+              s.x=(Math.random()-0.5)*s.z;
+              s.y=(Math.random()-0.5)*s.z;
+            }
+          }
+        },
+        destroy:function(targetId){
+          if(targetId){
+            if(WarpSpeed.RUNNING_INSTANCES[targetId])WarpSpeed.RUNNING_INSTANCES[targetId].destroy();
+          }else{
+            try{cancelAnimationFrame(this.drawRequest);}catch(e){this.drawRequest=-1;}
+            WarpSpeed.RUNNING_INSTANCES[this.targetId]=undefined;
+          }
+        },
+        pause:function(){
+          this.PAUSED=true;
+        },
+        resume:function(){
+          this.PAUSED=false;
+        }
+      }
+      
+      WarpSpeed.destroy=WarpSpeed.prototype.destroy;</script>
+    <div id="background">
+      <canvas id="bkFrame" width="100px" height="100px">fsfsdfsdfsd</canvas>
+      <script type="text/javascript">
+        ai_background=new WarpSpeed("bkFrame",{targetSpeed:0.8, speedAdjFactor:0.07, shape:"square", backgroundColor:"hsl(263,45%,8%)", speedWhileLoading:18});
+      </script>
+    </div>
+    
+  <div id ="bg">
   <div id="welcomeScreen">
-	  <h2>Welcome to SnackFox</h2>
+	  <h1>Welcome to SnackFox</h1>
 		<p>From the creators of PhotoJoke & Melvin's Graphs</p>
 		<ul id="messages"></ul>
-		<form class="form-inline" id="myForm" action="">
-		  <label for="name">Name:</label>
+		<form class="center" id="myForm" action="">
 		  <input id="m" type="m" id="email" placeholder="Enter Name" name="name">
-
-		  <button type="submit">Let's go!</button>
-		</form>
+    </form>
+    <p class="bttn" id="signin">Play</p>
 	</div>
 	<div id="selectRoomScreen" style='display:none;'>
 		 <h2>Select a room</h2>
-		 <button id="createroom">Create a room</button>
+		 <p class="bttn" id="createroom">Create a room</p>
 		 <ul id="rooms"></ul>
   </div>
   <div id="lobbyScreen" style='display:none;'>
     <h2 id="lobbyName">lobbyScreen</h2>
     <ul id="lobbyPlayers"></ul>
  </div>
-	
-	
+</div>
+
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  
 <script>
-var player = {name: "hello",room: ""};
+var player = {name: "hello",room: "", isHost:false};
  var socket = io();
  players = {};
-
-  function joinRoom(room){
+var aiBackground;
+function joinRoom(room){
         console.log("Joined" +room);
         player.room = unescape(room);
         socket.emit('update player', JSON.stringify(player));
         document.getElementById("lobbyScreen").style.display = "";
         document.getElementById("selectRoomScreen").style.display = "none";
     }
-  
 
+  function kickPlayer(p){
+      console.log("Kicked " +p);
+      socket.emit('kick player', JSON.stringify(unescape(p)));
+  }
   $(function () {
-    $('form').submit(function(e){
+    $('signin').click(function(e){
       e.preventDefault(); // prevents page reloading
       player.name = $('#m').val();
       document.getElementById("welcomeScreen").style.display = "none";
@@ -108,23 +310,32 @@ var player = {name: "hello",room: ""};
         for(var room in rooms){
           console.log(room);
           //var text = "<li onClick=joinRoom("hys room")>hys room - 1 players</li>
-         var text = "".concat("<li onClick=joinRoom(\"",escape(room),"\")>",room," - ",Object.keys(rooms[room]).length," players","</li>");
+         var text = "".concat("<li onClick=joinRoom(\"",escape(room),"\")><p>",room," - ",Object.keys(rooms[room]).length," players","</p></li>");
             console.log(text);
-        
           $('#rooms').append(text);
       }
       }
     }
-    
     function updateLobby(rooms){
-      console.log(player);
+      console.log("updating lobby " + JSON.stringify(rooms) + " " + player.hasOwnProperty("room"));
       
       if (player.hasOwnProperty("room")){
         $('#lobbyName').text(player.room);
         $('#lobbyPlayers').empty();
         if (player.room in rooms){
         for(var p in rooms[player.room]){
-          var text = "<li>" + rooms[player.room][p].name + "" + "</li>"
+          var currentPlayer = rooms[player.room][p];
+          var text = "";
+          if (currentPlayer.isHost){
+            text = "<li><p>" + rooms[player.room][p].name + "[HOST]" + "</p></li>"
+          }else{
+            if(player.isHost){
+              //text = "<li onClick=clickPlayer(\"",escape(currentPlayer),"\")>"+ rooms[player.room][p].name + " click to kick" + "</li>"
+              text = "<li onClick=kickPlayer(\"" + escape(p) + "\")><p>" + rooms[player.room][p].name + " [Kick] </p>" + "</li>"
+            }else{
+              text = "<li>" + rooms[player.room][p].name + "" + "</li>"
+            }
+          }
           $('#lobbyPlayers').append(text);
         }
         }
@@ -132,15 +343,24 @@ var player = {name: "hello",room: ""};
     }
 
 	  socket.on('update players', function(p){
-      document.getElementById("playersOnline").innerHTML = "Players online: " +  p;
+      document.getElementById("playersOnline").innerHTML = "Players online: " +  p + "<br><br>" + JSON.stringify(player);
       players = JSON.parse(p);
       updateRooms(players);
       updateLobby(players);
     });
 
+    socket.on('kick player', function(p){
+      if(socket.id == JSON.parse(p)){
+        player.room = "";
+        document.getElementById("lobbyScreen").style.display = "none";
+       document.getElementById("selectRoomScreen").style.display = "";  
+      }
+    });
+
     $("#createroom").click(function(e){
       var roomName = player.room;
       player.room = player.name + "'s room"
+      player.isHost = true;
       socket.emit('update player', JSON.stringify(player));
       document.getElementById("lobbyScreen").style.display = "";
       document.getElementById("selectRoomScreen").style.display = "none";  
@@ -148,5 +368,6 @@ var player = {name: "hello",room: ""};
   });
 
 </script>
+  <h4 id="playersOnline">test</h4>
  </body>
 </html>

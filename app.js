@@ -19,9 +19,15 @@ io.on('connection', (socket) => {
     if (Object.keys(rooms).length != 0){  
     for(var room in rooms){
       if(socket.id in rooms[room]){
+        var reallocateHost = false;
+        if (rooms[room][socket.id].isHost){
+          reallocateHost = true
+        }
         delete rooms[room][socket.id]
         if(Object.keys(rooms[room]).length == 0){
           delete rooms[room]
+        }else if(reallocateHost){
+          rooms[room][Object.keys(rooms[room])[0]].isHost = true;
         }
       }
     }
@@ -46,6 +52,18 @@ io.on('connection', (socket) => {
   socket.on('create room', (roomName) => {
     console.log('createRoom: ' + roomName);
 	io.emit('create room', roomName);
+  });
+  socket.on('kick player', (p) => {
+    player = JSON.parse(p);
+    console.log('kickplayer: ' + p);
+    for(var room in rooms){
+      if(player in rooms[room]){
+      delete rooms[room][player];
+      io.emit('update players', JSON.stringify(rooms));
+      console.log('successful: ' + player);
+      }
+    }
+	io.emit('kick player', p);
   });
 });
 
