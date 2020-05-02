@@ -19,6 +19,7 @@
   "devDependencies": {},
   "dependencies": {
     "express": "^4.15.2",
+    "progressbar.js": "^1.1.0",
     "socket.io": "^2.3.0",
     "upper-case": "^2.0.1"
   }

@@ -16,7 +16,55 @@ app.get('/questions.csv', (req, res) => {
   res.sendFile(__dirname + '/questions.csv');
 });
 
+function shuffle(array){
+  var currentIndex = array.length;
+  var temporaryValue;
+  var randomIndex;
+  while(0!== currentIndex){
+    randomIndex = Math.floor(Math.random () * currentIndex);
+    currentIndex -=1
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+  return array;
+}
+
+function startVoting(room){
+  votes[room] = [[],[]];
+  var qs = Object.keys(answers[room]);
+  if (qs.length > 0){
+    var q = qs[0];
+    io.emit('show answers', q,answers[room][q][0][0],answers[room][q][1][0],answers[room][q][0][1],answers[room][q][1][1]);
+    countdownVotes(15,room);
+  }
+} 
+function countdownVotes(secondsLeft,room)
+{
+ 
+  var votesLeft = Object.keys(rooms[room]).length - votes[room][0].length - votes[room][1].length
+  io.emit("countdown",secondsLeft + " waiting for " + votesLeft,room);
+  console.log(secondsLeft + " " + votesLeft);
+  if(secondsLeft == 0 || votesLeft == 0)
+    io.emit("display votes",JSON.stringify(votes[room][0]),JSON.stringify(votes[room][1]));
+  else{
+    setTimeout(countdownVotes, 1000,secondsLeft - 1,room);
+  }
+}
+function countdownAnswers(secondsLeft,room)
+{
+  io.emit("countdown",secondsLeft,room);
+  if(secondsLeft == 0 || answers[room]["answersLeft"] == 0){
+    delete answers[room]["answersLeft"];
+    startVoting(room);
+  }else{
+    setTimeout(countdownAnswers, 1000,secondsLeft - 1,room);
+  }
+}
+var votes = {};
 var rooms = {};
+var answers = {};
 io.on('connection', (socket) => {
   console.log('a user connected id: ' + socket.id + ", " + Object.keys(rooms).length + " players online");
   function removePlayer(id){
@@ -40,6 +88,9 @@ io.on('connection', (socket) => {
       io.emit('update players', JSON.stringify(rooms));
   }
 }
+  socket.on("vote", (room, vote) => {
+    votes[room][vote].push(socket.id);
+  });
   socket.on('disconnect', () => {
     console.log('user disconnected');
     removePlayer(socket.id);
@@ -59,6 +110,12 @@ io.on('connection', (socket) => {
 	  //console.log('update players: ' + JSON.stringify(players));
 	  io.emit('update players', JSON.stringify(rooms));
   });
+  socket.on('submit answer',(p,answer,question) => {
+    var player = JSON.parse(p);
+    answers[player.room][question].push([answer,socket.id]);
+    answers[player.room]["answersLeft"] = answers[player.room]["answersLeft"] - 1;
+    console.log("Waiting for " + answers[player.room]["answersLeft"] + " answers");
+  });
   socket.on('create room', (roomName) => {
     console.log('createRoom: ' + roomName);
 	io.emit('create room', roomName);
@@ -75,13 +132,20 @@ io.on('connection', (socket) => {
     //Pheobe text is massive, ability to display any image, extra points for bulling harry
     var allQuestions = text.toString('utf-8').split("\n");
     var numPlayers = Object.keys(rooms[game]).length;
+    if(numPlayers<2){
+      return;
+    }
+  
     questions = [];
-    var questionsPerPlayer = 3;
+    var questionsPerPlayer = 1;
+    answers[game] = {};
+    answers[game]["answersLeft"] = questionsPerPlayer * numPlayers * 2;
     while (questions.length < numPlayers * questionsPerPlayer){
       var qNumber = Math.floor(Math.random () * (allQuestions.length));
       var question = allQuestions[qNumber].toString();
       if(!(questions.includes(question))){
         questions.push(question);
+        answers[game][question] = [];
       }
     }
     var allocatedQuestions = 0;
@@ -91,8 +155,33 @@ io.on('connection', (socket) => {
         choices.push(ii);
       }
     }
-    var allocation = [];
-    for (var i =0; i <choices.length/2; i++){
+    var ps = Object.keys(rooms[game]);
+    var finalQuestions = {};
+    for(var p in ps){
+      finalQuestions[ps[p]] = [];
+    }
+    while(true){
+      var allocation = shuffle(choices.slice());
+      var allocation2 = shuffle(choices.slice());;
+      var repeat = false;
+      for (var i=0; i< allocation.length;i++){
+        if(allocation[i] == allocation2[i]){
+          repeat = true;
+        }
+      }
+      if(!repeat){
+        console.log(allocation);
+        console.log(allocation2);
+        for (var i=0; i< allocation.length;i++){
+          finalQuestions[ps[allocation[i]]].push(questions[i]);
+          finalQuestions[ps[allocation2[i]]].push(questions[i]);
+        }
+        countdownAnswers(45,game);
+        io.emit('start game', game, finalQuestions);
+        return;
+      }
+    }
+    /*for (var i =0; i <choices.length/2; i++){
         var c1 = undefined;
         while (c1 == undefined){
           var num = Math.floor(Math.random () * (choices.length));
@@ -106,10 +195,9 @@ io.on('connection', (socket) => {
         }
         delete choices[choices.indexOf(c2)];
         allocation[i] = [c1,c2];
-    }
+    }*/
 
-    console.log(allocation);
-	  io.emit('start game');
+    
   });
 });
 

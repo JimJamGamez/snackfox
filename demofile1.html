@@ -16,9 +16,7 @@ body, html {
 	line-height:1.55;
 	overflow-x:hidden;
 }
-div {
-  padding: 10px 10px 10px 10px;
-}
+
 @font-face {
 	font-family: 'Roboto';
 	font-style: normal;
@@ -50,6 +48,11 @@ div {
   background-repeat: no-repeat;
   background-size: cover;
 }
+#card1, #card2{
+  border-color: #C1E0FF;
+  border-width:0px;
+  border-style:solid;
+}
 #background{
 	position:fixed;
 	z-index:-1;
@@ -63,6 +66,14 @@ div {
 #bkFrame{
   width:100vw;
 	height:100vh;
+}
+#progress {
+  margin: 20px;
+  width: 100px;
+  top:0px;
+  left:0px;
+  height: 100px;
+  position: relative;
 }
 @font-face {
     font-family: 'Lato';
@@ -89,10 +100,78 @@ h1,h2,h3,h4,h5,h6{
   text-align: center;
 }
 
+.container {
+  width: 30%;
+  height: 70%;
+  position: relative;
+  perspective: 800px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  padding: 0px;
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+}
+
+.card figure {
+  margin: 0;
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card .front {
+  background: #FFFFF0;
+  display: flex;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.card .back {
+  background: #FFFFF0;
+  border-radius: 25px;
+  transform: rotateY( 180deg);
+}
+
+.card.flipped {
+  transform: rotateY( 180deg);
+}
+#frontText1,#frontText2{
+    max-height: 100%;
+    font-size: 40px;
+}
+#backText1, #backText2{
+    height: 40%;
+    font-size: 40px;
+}
+#backName1,#backName2{
+    height: 20%;
+    font-size: 40px;
+}
+#votes1,#votes2{
+    height: 40%;
+    font-size: 20px;
+}
+.no-resize, .resize {
+  width: 90%;
+    height:90%;
+    color: #111;
+   
+    text-align: center;
+    display: inline-block
+}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1" /> 
   </head>
-  <body>
+  <body  onresize="autoSizeText()">
     <script type="text/javascript" src="/background.js"></script>
     <div id="background">
       <canvas id="bkFrame" width="100px" height="100px">fsfsdfsdfsd</canvas>
@@ -100,8 +179,8 @@ h1,h2,h3,h4,h5,h6{
         spaceBg=new WarpSpeed("bkFrame",{targetSpeed:0.8,speedWhileLoading:8, speedAdjFactor:0.07, shape:"square", backgroundColor:"hsl(263,45%,8%)", speedWhileLoading:18,density:2.6});
       </script>
     </div>
-    
-  <div id ="bg">
+    <p id="countdown"></p>
+  <div id ="bg" style="width: 100%; height:100%;"> 
   <div id="welcomeScreen">
 	  <h1>Welcome to SnackFox</h1>
 		<p>From the creators of PhotoJoke & Melvin's Graphs</p>
@@ -110,7 +189,6 @@ h1,h2,h3,h4,h5,h6{
 		  <input id="m" placeholder="Enter Name">
     </form>
     <div id="signin"><p class="bttn" >Play</p></div>
-    
 	</div>
 	<div id="selectRoomScreen" style='display:none;'>
 		 <h2>Select a room</h2>
@@ -123,15 +201,143 @@ h1,h2,h3,h4,h5,h6{
     <div id="leave"><p class="bttn" >Leave</p></div>
     <div  id="startGame" style='display:none;'><p class="bttn">Start Game</p></div>
  </div>
-</div>
+ <div id="questionScreen" style='display:none;'>
+  <form class="center" id="questionForm">
+    <label id="questionLabel">Question goes here</label>
+    <br>
+    <input div id="answer" placeholder="Type Answer">
+  </form>
+  <div id="answerButton"><p class="bttn" >Submit</p></div>
+ </div>
+ <div id="waitingScreen" style='display:none;'>
+  <h4>Waiting for players</h4>
+ </div>
+ <div id="votingScreen" style="width: 100%; height:100%;display:none;">
+  
+  <h1 id="questionlab"></h1>
+  <br>
+  <div style="width: 100%; height:60%; display: table;">
+        <div style="display: table-row">
+          <section class="container" style="display: table-cell; width: 2.5%;"></section>
+            <section class="container" style="display: table-cell;" id="card1">
+                <div id="leftcard" class="card">
+                  <figure class="front" id="front">
+                      <div class='resize' id="frontText1">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                  </figure>
+                  <figure class="back" class="card">
+                      <div class='resize' id="backName1">Jamie's answer</div>
+                      <div class='resize' id="backText1">Eating poop out the toilet is very bad for your health lolololol</div>
+                      <div class='resize' id="votes1">Eating poop out the toilet is very bad for your health lolololol</div>
+                  </figure>
+                </div>
+              </section>
+              <section class="container" style="display: table-cell; width: 5%;">
+                
+              </section>
+              <section class="container" style="display: table-cell;" id="card2">
+                  <div id="rightcard" class="card">
+                    <figure class="front" id="front">
+                        <div class='resize' id="frontText2">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                    </figure>
+                    <figure class="back">
+                        <div class='resize' id="backName2">Jamie's answer</div>
+                        <div class='resize' id="backText2">Eating poop out the toilet is very bad for your health lolololol</div>
+                        <div class='resize' id="votes2">Eating poop out the toilet is very bad for your health lolololol</div>
+                    </figure>
+                  </div>
+                </section>
+                <section class="container" style="display: table-cell; width: 2.5%;"></section>
+               
+        </div>
+        
+    </div>
 
+ </div>
+</div>
+<div id="progress" style='display:none;'>
+</div>
+<script>
+  var card = document.getElementById('leftcard');
+document.getElementById('flip').addEventListener('click', function() {
+card.classList.toggle('flipped');
+
+autoSizeText();
+}, false);
+  </script>
 	<script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="https://rawgit.com/kimmobrunfeldt/progressbar.js/1.0.0/dist/progressbar.js"></script>
+  <script>
+    var autoSizeText;
+autoSizeText = function() {
+  var el, elements, _i, _len, _results;
+  elements = $('.resize');
+  console.log(elements);
+  if (elements.length < 0) {
+    return;
+  }
+  _results = [];
+  for (_i = 0, _len = elements.length; _i < _len; _i++) {
+    el = elements[_i];
+    _results.push((function(el) {
+      var resizeText, _results1;
+      resizeText = function() {
+        var elNewFontSize;
+        elNewFontSize = (parseInt($(el).css('font-size').slice(0, -2)) - 1) + 'px';
+        return $(el).css('font-size', elNewFontSize);
+      };
+      _results1 = [];
+      while (el.scrollHeight > el.offsetHeight) {
+        _results1.push(resizeText());
+      }
+       return _results1;
+    })(el));
+  }
+  return _results;
+};
+
+$(document).ready(function() {
   
+  return autoSizeText();
+});
+</script>
 <script>
 var player = {name: "hello",room: "", isHost:false};
  var socket = io();
  players = {};
+ var questions = [];
+ var hasVoted = false;
+ 
+ var bar = new ProgressBar.Circle("#progress", {
+  color: '#aaa',
+  // This has to be the same size as the maximum width to
+  // prevent clipping
+  strokeWidth: 4,
+  trailWidth: 1,
+  easing: 'linear',
+  duration: 45000,
+  text: {
+    autoStyleContainer: false
+  },
+  from: { color: '#ED6A5A', width: 6 },
+  to: { color: '#FFEA82', width: 6 },
+  // Set default step function for all animate calls
+  step: function(state, circle) {
+    circle.path.setAttribute('stroke', state.color);
+    circle.path.setAttribute('stroke-width', state.width);
+
+    var value = Math.round(circle.value()*45);
+    if (value === 0) {
+      circle.setText('');
+    } else {
+      circle.setText(value);
+    }
+
+  }
+});
+bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+bar.text.style.fontSize = '2rem';
+bar.set(1.0)
 var spaceBg;
 function joinRoom(room){
         console.log("Joined" +room);
@@ -149,8 +355,10 @@ function joinRoom(room){
   $(function () {
     function signin(e){
       e.preventDefault(); // prevents page reloading
-      if ($('#m').val().length > 0){
+      if ($('#m').val().length > -1){
       player.name = $('#m').val();
+      var names = ["anna","bean","cat","dog","jamie","craig","fred","mike","toe"]
+      player.name = names[Math.floor(Math.random()*names.length)];
       document.getElementById("welcomeScreen").style.display = "none";
       document.getElementById("selectRoomScreen").style.display = "";
 
@@ -158,8 +366,25 @@ function joinRoom(room){
       }
       return false;
     }
+
+    function submitAnswer(e){
+      e.preventDefault();
+      if ($('#answer').val().length > 0){
+        socket.emit('submit answer',JSON.stringify(player),$('#answer').val(),questions.pop());
+        nextQuestion();
+      }else{
+        $('#answer').val(Math.random());
+      }
+    }
+    
+    player.name = socket.id;
+    socket.emit('request update');
     $('#signin').click(signin);
     $('#myForm').submit(signin);
+
+    $('#answerButton').click(submitAnswer);
+    $('#questionForm').submit(submitAnswer);
+
     $('#leave').click(function(e){
       console.log("Leave" + socket.id);
       kickPlayer(socket.id);
@@ -182,6 +407,30 @@ function joinRoom(room){
       }
       }
     }
+
+    function showScreen(id){
+        var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen"]
+        for(var i =0; i<screens.length;i++){
+          document.getElementById(screens[i]).style.display = "none";
+        }
+        document.getElementById(id).style.display = "";
+      }
+
+    function nextQuestion(){
+      showScreen("questionScreen")
+      
+      if(questions.length>0){
+        document.getElementById("questionLabel").innerHTML = questions[questions.length-1];
+        if ($('#answer').val().length>0){
+          $('#answer').val("");
+        }
+      }else{
+        showScreen("waitingScreen")
+      }
+    }
+
+  
+
     function updateLobby(rooms){
       console.log("updating lobby " + JSON.stringify(rooms) + " " + player.hasOwnProperty("room"));
       
@@ -215,6 +464,8 @@ function joinRoom(room){
     }
     }
 
+    
+
 	  socket.on('update players', function(p){
       document.getElementById("playersOnline").innerHTML = "Players online: " +  p + "<br><br>" + JSON.stringify(player);
       players = JSON.parse(p);
@@ -230,9 +481,18 @@ function joinRoom(room){
        document.getElementById("selectRoomScreen").style.display = "";  
       }
     });
-    socket.on("start game", function(){
-      spaceBg.speedWhileLoading = 18;
-      spaceBg.warp(5000);
+    socket.on("start game", function(room, qs){
+      questions = qs[socket.id];
+      if(room = player.room){
+        spaceBg.speedWhileLoading = 18;
+        spaceBg.warp(300);
+        document.getElementById("playersOnline").innerHTML = questions;
+        setTimeout(function(){
+          nextQuestion();
+          bar.set(1.0);
+          bar.animate(0.0)
+			  },300)
+      }
     });
 
     $("#createroom").click(function(e){
@@ -243,8 +503,70 @@ function joinRoom(room){
       document.getElementById("lobbyScreen").style.display = "";
       document.getElementById("selectRoomScreen").style.display = "none";  
     });
-  });
 
+    socket.on('countdown',function(secondsleft,room){
+        if(room == player.room){
+          $("#countdown").text(secondsleft);
+        }
+    });
+
+    socket.on('show answers',function(question, answer1,answer2,p1,p2){
+      $('#frontText1').text(answer1);
+      $('#frontText2').text(answer2);
+      console.log(players);
+      console.log(p1);
+      $('#backName1').text(players[player.room][p1].name + "'s answer");
+      $('#backName2').text(players[player.room][p2].name + "'s answer");
+      $('#backText1').text(answer1);
+      $('#backText2').text(answer2);
+      $('#questionlab').text(question);
+      showScreen("votingScreen");
+      hasVoted = false;
+      autoSizeText();
+      $("#card1").css({"border-width":"0px"})
+      $("#card2").css({"border-width":"0px"})
+    });
+
+    socket.on("display votes",function(v10,v20){
+      $("#countdown").text(v10 + " " + v20);
+      var v1 = JSON.parse(v10);
+      var v2 = JSON.parse(v20);
+      autoSizeText();
+      $('#votes1').empty();
+      $('#votes2').empty();
+      for (var p in v1){
+        $('#votes1').append(players[player.room][v1[p]].name  + "<br>")
+      }
+      for (var p in v2){
+        $('#votes2').append(players[player.room][v2[p]].name  + "<br>")
+      }
+      document.getElementById('leftcard').classList.toggle('flipped');
+      setTimeout(function(){
+        document.getElementById('rightcard').classList.toggle('flipped');
+			  },300)
+    });
+
+    function vote(card){
+      if(!hasVoted){
+      hasVoted = true;
+      var c;
+      if(card == 1){
+          c= $("#card1");
+      }else{
+        c = $("#card2");
+      }
+      c.css({ "border-width":"20px"});
+      socket.emit("vote",player.room,card-1);
+    };
+    }
+    $("#card1").click(function(e){
+      vote(1);
+    });
+    $("#card2").click(function(e){
+      vote(2);
+    });
+  });
+  
 </script>
   <p id="playersOnline">test</p>
  </body>

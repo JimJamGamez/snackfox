@@ -1,0 +1,152 @@
+<html>
+    <style>
+        .container {
+  width: 30%;
+  height: 70%;
+  position: relative;
+  perspective: 800px;
+}
+
+#card {
+  width: 100%;
+  height: 100%;
+  
+  position: absolute;
+  transform-style: preserve-3d;
+  transition: transform 1s;
+}
+
+#card figure {
+  margin: 0;
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+#card .front {
+  background: red;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+#card .back {
+  background: blue;
+  transform: rotateY( 180deg);
+}
+
+#card.flipped {
+  transform: rotateY( 180deg);
+}
+#frontText{
+    max-height: 100%;
+    font-size: 50px;
+}
+#backText{
+    height: 40%;
+    font-size: 50px;
+}
+#backName{
+    height: 20%;
+    font-size: 50px;
+}
+#votes{
+    height: 40%;
+    font-size: 20px;
+}
+.no-resize, .resize {
+    width: 90%;
+    height:90%;
+    border: 1px solid #000;
+    color: #000;
+   
+    text-align: center;
+    display: inline-block
+}
+</style>
+   
+<body onresize="autoSizeText()">
+    <div style="width: 100%; height:60%; display: table;">
+        <div style="display: table-row">
+            <section class="container" style="display: table-cell; ">
+                <div id="card">
+                  <figure class="front" id="front">
+                      <div class='resize' id="frontText">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                  </figure>
+                  <figure class="back">
+                      <div class='resize' id="backName">Jamie's answer</div>
+                      <div class='resize' id="backText">Eating poop out the toilet is very bad for your health lolololol</div>
+                      <div class='resize' id="votes">Eating poop out the toilet is very bad for your health lolololol</div>
+                  </figure>
+                </div>
+              </section>
+              <section class="container" style="display: table-cell; width: 5%;">
+                
+              </section>
+              <section class="container" style="display: table-cell;">
+                  <div id="card">
+                    <figure class="front" id="front">
+                        <div class='resize' id="frontText">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                    </figure>
+                    <figure class="back">
+                        <div class='resize' id="backName">Jamie's answer</div>
+                        <div class='resize' id="backText">Eating poop out the toilet is very bad for your health lolololol</div>
+                        <div class='resize' id="votes">Eating poop out the toilet is very bad for your health lolololol</div>
+                    </figure>
+                  </div>
+                </section>
+        </div>
+    </div>
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script>
+    var autoSizeText;
+autoSizeText = function() {
+  var el, elements, _i, _len, _results;
+  elements = $('.resize');
+  console.log(elements);
+  if (elements.length < 0) {
+    return;
+  }
+  _results = [];
+  for (_i = 0, _len = elements.length; _i < _len; _i++) {
+    el = elements[_i];
+    _results.push((function(el) {
+      var resizeText, _results1;
+      resizeText = function() {
+        var elNewFontSize;
+        elNewFontSize = (parseInt($(el).css('font-size').slice(0, -2)) - 1) + 'px';
+        return $(el).css('font-size', elNewFontSize);
+      };
+      _results1 = [];
+      while (el.scrollHeight > el.offsetHeight) {
+        _results1.push(resizeText());
+      }
+       return _results1;
+    })(el));
+  }
+  return _results;
+};
+
+$(document).ready(function() {
+  return autoSizeText();
+});
+</script>
+<section id="options">
+  <p>
+    <button id="flip">Flip Card</button>
+  </p>
+</section>
+</body>
+<script>
+    var card = document.getElementById('card');
+document.getElementById('flip').addEventListener('click', function() {
+card.classList.toggle('flipped');
+}, false);
+    </script>
+</html>
