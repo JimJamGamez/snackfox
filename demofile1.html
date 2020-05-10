@@ -16,6 +16,84 @@ body, html {
 	line-height:1.55;
 	overflow-x:hidden;
 }
+table, th, td {
+  border-collapse: collapse;
+  margin-left:auto;
+  margin-right:auto;
+}
+th, td {
+  padding: 5px;  
+}
+
+.myimg{
+  width:50px;
+  height:50px;
+  object-fit:cover;
+  border-radius:50%;
+}
+
+li {
+  list-style: none;
+}
+
+#leaderboard li {
+  font-family:'Roboto',sans-serif;
+		font-size: 12px;
+		line-height: 12px;
+    color:#0f0919;
+	}
+
+	#leaderboard #players li {
+		display:block;
+		clear: both;
+		position: absolute;
+		width: 350px;
+		-moz-transition-duration: 1s;
+		-webkit-transition-duration: 1s;
+		-ms-transition-duration: 1s;
+	}
+
+	#leaderboard #players li.header {
+		font-weight: bold;
+		background-color: silver;
+		background: -moz-linear-gradient(top, #cedce7 0%, #596a72 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cedce7), color-stop(100%,#596a72));
+	}
+
+	#leaderboard #players {
+		padding: 0;
+		width: 350px;
+		position: relative;
+		border: 1px solid #333;
+		box-shadow: 2px 2px 5px gray;
+		height: 132px;
+		background: -moz-linear-gradient(top, #cedce7 0%, #596a72 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#cedce7), color-stop(100%,#596a72));
+	}
+
+	#leaderboard #players div {
+		display: block;
+		float: left;
+		overflow: hidden;
+		padding: 5px;
+	}
+
+	#leaderboard .player {
+		background: -moz-linear-gradient(top, #feffff 0%, #e0dace 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#feffff), color-stop(100%,#e0dace));
+	}
+
+	#leaderboard .rank {
+		width: 50px;
+	}
+
+	#leaderboard .name {
+		width: 150px;
+	}
+
+	#leaderboard .score {
+		width: 100px;	
+	}
 
 @font-face {
 	font-family: 'Roboto';
@@ -197,7 +275,7 @@ h1,h2,h3,h4,h5,h6{
   </div>
   <div id="lobbyScreen" style='display:none;'>
     <h2 id="lobbyName">lobbyScreen</h2>
-    <ul id="lobbyPlayers"></ul>
+    <table id="lobbyPlayers"></table>
     <div id="leave"><p class="bttn" >Leave</p></div>
     <div  id="startGame" style='display:none;'><p class="bttn">Start Game</p></div>
  </div>
@@ -211,6 +289,21 @@ h1,h2,h3,h4,h5,h6{
  </div>
  <div id="waitingScreen" style='display:none;'>
   <h4>Waiting for players</h4>
+ </div>
+ <div id="leaderboardScreen" style='display:none;'>
+  <h4>Leaderboard goes here</h4>
+  <div style='display:inline-block;width:350px'>
+  
+  <div id="leaderboard">
+    <ul id="players">
+      <li class="header">
+        <div class="rank">Rank</div>
+        <div class="name">Player</div>
+        <div class="score">Score</div>
+      </li>
+    </ul>
+  </div>
+</div>
  </div>
  <div id="votingScreen" style="width: 100%; height:100%;display:none;">
   
@@ -302,12 +395,20 @@ $(document).ready(function() {
 });
 </script>
 <script>
-var player = {name: "hello",room: "", isHost:false};
+var player = {name: "hello",room: "", isHost:false, score:0,img:""};
  var socket = io();
  players = {};
  var questions = [];
  var hasVoted = false;
- 
+
+ var rawFile = new XMLHttpRequest();
+	rawFile.open("GET", "profilePictures.csv", false);
+rawFile.send(null);
+var allText = rawFile.responseText;
+      
+var profilePictures = rawFile.responseText.toString('utf-8').split("\n");
+
+
  var bar = new ProgressBar.Circle("#progress", {
   color: '#aaa',
   // This has to be the same size as the maximum width to
@@ -339,12 +440,49 @@ bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
 bar.text.style.fontSize = '2rem';
 bar.set(1.0)
 var spaceBg;
+
+function zoomOut(size,id){
+  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen"];
+  for(var i =0; i<screens.length;i++){
+          //document.getElementById(screens[i]).style.display = "none";
+          $("#" + screens[i]).css({"transform":"scale(" + size + ")","transition: transform":".2s"});
+         
+        }
+  if(size>0.1){
+  setTimeout(zoomOut,1,size-0.05,id);
+  }else{
+    for(var i =0; i<screens.length;i++){
+          document.getElementById(screens[i]).style.display = "none";      
+    }
+    document.getElementById(id).style.display = "";
+    zoomIn(0.1);
+  }
+}
+
+function zoomIn(size,id){
+  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen","leaderboardScreen"];
+  for(var i =0; i<screens.length;i++){
+          //document.getElementById(screens[i]).style.display = "none";
+          $("#" + screens[i]).css({"transform":"scale(" + size + ")","transition: transform":".2s"});       
+        }
+  if(size<1){
+    setTimeout(zoomIn,1,size+0.05,id);
+  }else{
+    
+  }
+}
+
+function showScreen(id){
+        var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen","leaderboardScreen"];
+        zoomOut(1,id);
+    }
+
 function joinRoom(room){
         console.log("Joined" +room);
         player.room = unescape(room);
+        player.img = profilePictures[Math.floor(Math.random()*profilePictures.length)]
         socket.emit('update player', JSON.stringify(player));
-        document.getElementById("lobbyScreen").style.display = "";
-        document.getElementById("selectRoomScreen").style.display = "none";
+        showScreen("lobbyScreen");
     }
 
   function kickPlayer(p){
@@ -355,12 +493,15 @@ function joinRoom(room){
   $(function () {
     function signin(e){
       e.preventDefault(); // prevents page reloading
-      if ($('#m').val().length > -1){
+      if ($('#m').val().length > 0){
       player.name = $('#m').val();
+      showScreen("selectRoomScreen");
+
+      socket.emit('request update');
+      }else{
       var names = ["anna","bean","cat","dog","jamie","craig","fred","mike","toe"]
       player.name = names[Math.floor(Math.random()*names.length)];
-      document.getElementById("welcomeScreen").style.display = "none";
-      document.getElementById("selectRoomScreen").style.display = "";
+      showScreen("selectRoomScreen");
 
       socket.emit('request update');
       }
@@ -408,14 +549,7 @@ function joinRoom(room){
       }
     }
 
-    function showScreen(id){
-        var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen"]
-        for(var i =0; i<screens.length;i++){
-          document.getElementById(screens[i]).style.display = "none";
-        }
-        document.getElementById(id).style.display = "";
-      }
-
+    
     function nextQuestion(){
       showScreen("questionScreen")
       
@@ -429,8 +563,7 @@ function joinRoom(room){
       }
     }
 
-  
-
+    
     function updateLobby(rooms){
       console.log("updating lobby " + JSON.stringify(rooms) + " " + player.hasOwnProperty("room"));
       
@@ -447,17 +580,18 @@ function joinRoom(room){
         if (player.room in rooms){
           for(var p in rooms[player.room]){
             var currentPlayer = rooms[player.room][p];
-            var text = "";
+            var text = '<tr><td><img style="float: left;" src="' + currentPlayer.img + '" class="myimg" /></td>'
             if (currentPlayer.isHost){
-              text = "<li><p>" + rooms[player.room][p].name + " [HOST]" + "</p></li>"
+              text += "<td><p>" + rooms[player.room][p].name + " [HOST]" + "</p></td>"
             }else{
               if(player.isHost){
                 //text = "<li onClick=clickPlayer(\"",escape(currentPlayer),"\")>"+ rooms[player.room][p].name + " click to kick" + "</li>"
-                text = "<li onClick=kickPlayer(\"" + escape(p) + "\")><p>" + rooms[player.room][p].name + " [Kick] </p>" + "</li>"
+                text += "<td onClick=kickPlayer(\"" + escape(p) + "\")><p>" + rooms[player.room][p].name + " [Kick] </p>" + "</td>"
               }else{
-                text = "<li>" + rooms[player.room][p].name + "" + "</li>"
+                text += "<td><p>" +  rooms[player.room][p].name + "</p>" + "</td>"
               }
             }
+            text+="</tr>"
             $('#lobbyPlayers').append(text);
         }
         }
@@ -477,8 +611,7 @@ function joinRoom(room){
       if(socket.id == JSON.parse(p)){
         player.room = "";
         player.isHost = false;
-        document.getElementById("lobbyScreen").style.display = "none";
-       document.getElementById("selectRoomScreen").style.display = "";  
+       showScreen("selectRoomScreen");
       }
     });
     socket.on("start game", function(room, qs){
@@ -499,15 +632,45 @@ function joinRoom(room){
       var roomName = player.room;
       player.room = player.name + "'s room"
       player.isHost = true;
+      player.img = profilePictures[Math.floor(Math.random()*profilePictures.length)]
       socket.emit('update player', JSON.stringify(player));
-      document.getElementById("lobbyScreen").style.display = "";
-      document.getElementById("selectRoomScreen").style.display = "none";  
+      showScreen("lobbyScreen"); 
     });
 
     socket.on('countdown',function(secondsleft,room){
         if(room == player.room){
           $("#countdown").text(secondsleft);
         }
+    });
+
+    socket.on('show leaderboard', function(){
+      var $list = $("#players");
+      player.room = "dog's room";
+      console.log(players[player.room]);
+      for (var i =0;i<5;i++){
+    var item = 
+				"<li class='player' style='top:" + 22*(i+1) + "px;'>" + 
+					"<div class='rank'>" + ( i) + "</div>" + 
+					"<div class='name'>" + 54 + "</div>" +
+					"<div class='score'>" + 0 + "</div>" +
+				"</li>"
+      $list.append(item)
+   }
+      var rank = 1
+      for(var i in players[player.room]) {
+        
+			var $item = $(
+				"<li class='player' style='top:" + 22*(rank) + "px;'>" + 
+					"<div class='rank'>" + rank + "</div>" + 
+					"<div class='name'>" + players[player.room][i].name + "</div>" +
+					"<div class='score'>" + 0 + "</div>" +
+        "</li>");
+        
+      $list.append($item); 
+      rank +=1;
+    }
+   
+    showScreen('leaderboardScreen');
     });
 
     socket.on('show answers',function(question, answer1,answer2,p1,p2){
@@ -543,7 +706,13 @@ function joinRoom(room){
       document.getElementById('leftcard').classList.toggle('flipped');
       setTimeout(function(){
         document.getElementById('rightcard').classList.toggle('flipped');
-			  },300)
+        },300)
+      setTimeout(function(){
+        document.getElementById('leftcard').classList.toggle('flipped');
+        setTimeout(function(){
+        document.getElementById('rightcard').classList.toggle('flipped');
+        },300)
+      },3000)
     });
 
     function vote(card){
@@ -566,7 +735,7 @@ function joinRoom(room){
       vote(2);
     });
   });
-  
+
 </script>
   <p id="playersOnline">test</p>
  </body>

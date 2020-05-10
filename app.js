@@ -15,6 +15,10 @@ app.get('/background.js', (req, res) => {
 app.get('/questions.csv', (req, res) => {
   res.sendFile(__dirname + '/questions.csv');
 });
+app.get('/profilePictures.csv', (req, res) => {
+  res.sendFile(__dirname + '/profilePictures.csv');
+});
+
 
 function shuffle(array){
   var currentIndex = array.length;
@@ -38,17 +42,20 @@ function startVoting(room){
     var q = qs[0];
     io.emit('show answers', q,answers[room][q][0][0],answers[room][q][1][0],answers[room][q][0][1],answers[room][q][1][1]);
     countdownVotes(15,room);
+  }else{
+    setTimeout(function(){io.emit('show leaderboard')},3000);
   }
 } 
 function countdownVotes(secondsLeft,room)
 {
- 
   var votesLeft = Object.keys(rooms[room]).length - votes[room][0].length - votes[room][1].length
   io.emit("countdown",secondsLeft + " waiting for " + votesLeft,room);
   console.log(secondsLeft + " " + votesLeft);
-  if(secondsLeft == 0 || votesLeft == 0)
+  if(secondsLeft == 0 || votesLeft == 0){
     io.emit("display votes",JSON.stringify(votes[room][0]),JSON.stringify(votes[room][1]));
-  else{
+    delete answers[room][Object.keys(answers[room])[0]];
+    setTimeout(startVoting,3000,room);
+  }else{
     setTimeout(countdownVotes, 1000,secondsLeft - 1,room);
   }
 }
@@ -67,6 +74,9 @@ var rooms = {};
 var answers = {};
 io.on('connection', (socket) => {
   console.log('a user connected id: ' + socket.id + ", " + Object.keys(rooms).length + " players online");
+  //rooms = {"dog's room":{"VzM0hji3Z45sxyduAAAB":{"name":"dog","room":"dog's room","isHost":true},"E4ln820PpLyeqzksAAAC":{"name":"jamie","room":"dog's room","isHost":false}}};
+  //io.emit('update players', JSON.stringify(rooms));
+  //io.emit('show leaderboard');
   function removePlayer(id){
     console.log("remove player " + id)
     if (Object.keys(rooms).length != 0){  
