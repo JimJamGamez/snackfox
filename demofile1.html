@@ -47,7 +47,7 @@ li {
 		display:block;
 		clear: both;
 		position: absolute;
-		width: 350px;
+		width: 400px;
 		-moz-transition-duration: 1s;
 		-webkit-transition-duration: 1s;
 		-ms-transition-duration: 1s;
@@ -62,7 +62,7 @@ li {
 
 	#leaderboard #players {
 		padding: 0;
-		width: 350px;
+		width: 400px;
 		position: relative;
 		border: 1px solid #333;
 		box-shadow: 2px 2px 5px gray;
@@ -84,6 +84,10 @@ li {
 	}
 
 	#leaderboard .rank {
+		width: 50px;
+	}
+
+  #leaderboard .pfp {
 		width: 50px;
 	}
 
@@ -226,7 +230,11 @@ h1,h2,h3,h4,h5,h6{
     max-height: 100%;
     font-size: 40px;
 }
-#backText1, #backText2{
+#frontImage1,#frontImage2{
+  width:90%;
+  height:90%;
+}
+#backText1, #backText2 #backImage1 #backImage2{
     height: 40%;
     font-size: 40px;
 }
@@ -260,7 +268,7 @@ h1,h2,h3,h4,h5,h6{
     <p id="countdown"></p>
   <div id ="bg" style="width: 100%; height:100%;"> 
   <div id="welcomeScreen">
-	  <h1>Welcome to SnackFox</h1>
+	  <h1>Welcome to Quipflash</h1>
 		<p>From the creators of PhotoJoke & Melvin's Graphs</p>
 		<ul id="messages"></ul>
 		<form class="center" id="myForm">
@@ -283,7 +291,8 @@ h1,h2,h3,h4,h5,h6{
   <form class="center" id="questionForm">
     <label id="questionLabel">Question goes here</label>
     <br>
-    <input div id="answer" placeholder="Type Answer">
+    <input id="answerImage" type="file" accept="image/*">
+    <input id="answer" placeholder="Type Answer">
   </form>
   <div id="answerButton"><p class="bttn" >Submit</p></div>
  </div>
@@ -292,12 +301,13 @@ h1,h2,h3,h4,h5,h6{
  </div>
  <div id="leaderboardScreen" style='display:none;'>
   <h4>Leaderboard goes here</h4>
-  <div style='display:inline-block;width:350px'>
+  <div style='display:inline-block;width:400px'>
   
   <div id="leaderboard">
     <ul id="players">
       <li class="header">
         <div class="rank">Rank</div>
+        <div class="pfp"></div>
         <div class="name">Player</div>
         <div class="score">Score</div>
       </li>
@@ -316,6 +326,7 @@ h1,h2,h3,h4,h5,h6{
                 <div id="leftcard" class="card">
                   <figure class="front" id="front">
                       <div class='resize' id="frontText1">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                      <div id="frontImage1"></div>
                   </figure>
                   <figure class="back" class="card">
                       <div class='resize' id="backName1">Jamie's answer</div>
@@ -331,6 +342,7 @@ h1,h2,h3,h4,h5,h6{
                   <div id="rightcard" class="card">
                     <figure class="front" id="front">
                         <div class='resize' id="frontText2">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                        <div id="frontImage2">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
                     </figure>
                     <figure class="back">
                         <div class='resize' id="backName2">Jamie's answer</div>
@@ -395,7 +407,8 @@ $(document).ready(function() {
 });
 </script>
 <script>
-var player = {name: "hello",room: "", isHost:false, score:0,img:""};
+var player = {name: "hello",room: "", isHost:false, score:0,img:"",lastRank:-1};
+var round = 1;
  var socket = io();
  players = {};
  var questions = [];
@@ -441,7 +454,21 @@ bar.text.style.fontSize = '2rem';
 bar.set(1.0)
 var spaceBg;
 
+var lastTime = -1;
+function getPoints(v1,v2){
+      var max = 2000;
+      var total = v1.length + v2.length;
+      var amount = Math.round((v1.length * max / total)/100)*100
+      var text = "+" + amount;
+      if(v1.length==total){
+        text += "<br>QUIPLOSH"
+      }
+      return text;
+    }
 function zoomOut(size,id){
+  var d = new Date();
+  var deltaTime =  d.getTime() - lastTime;
+
   var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen"];
   for(var i =0; i<screens.length;i++){
           //document.getElementById(screens[i]).style.display = "none";
@@ -449,7 +476,7 @@ function zoomOut(size,id){
          
         }
   if(size>0.1){
-  setTimeout(zoomOut,1,size-0.05,id);
+  setTimeout(zoomOut,1,size-0.0003*deltaTime,id);
   }else{
     for(var i =0; i<screens.length;i++){
           document.getElementById(screens[i]).style.display = "none";      
@@ -460,20 +487,90 @@ function zoomOut(size,id){
 }
 
 function zoomIn(size,id){
-  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen","leaderboardScreen"];
+  var d = new Date();
+  var deltaTime =  d.getTime() - lastTime;
+  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","waitingScreen","votingScreen","leaderboardScreen"];
   for(var i =0; i<screens.length;i++){
           //document.getElementById(screens[i]).style.display = "none";
           $("#" + screens[i]).css({"transform":"scale(" + size + ")","transition: transform":".2s"});       
         }
+
+
+    var canvasDiv = document.getElementById("frontImage1")
+    if(canvasDiv.childElementCount>0){
+    var c = canvasDiv.childNodes[0]
+    console.log("test2",c);
+    //fitToContainer(c,canvasDiv)
+    var ctx = c.getContext("2d");
+    //setCanvasImage(canvasDiv,c.get)
+    }
   if(size<1){
-    setTimeout(zoomIn,1,size+0.05,id);
+    var final = size+0.0003*deltaTime;
+    if(final > 1){
+      final = 1;
+    }
+    setTimeout(zoomIn,1,final,id);
   }else{
     
   }
 }
 
+function leaderboard(){
+      var $list = $("#players");
+      console.log(players[player.room]);
+      var rank = 1
+      var playerArray = Object.keys(players[player.room]);
+      playerArray.sort(function(a, b){
+          return players[player.room][b].score - players[player.room][a].score;
+      });
+      var rank = 1;
+      for (var i = 0; i < playerArray.length; i++){
+        players[player.room][playerArray[i]].rank = i + 1
+      }
+      rank = 1;
+     if($(".player").length == 0){
+       player.lastRank = 0;
+      for(var ii=0; ii < Object.keys(players[player.room]).length; ii++) {
+          var i = Object.keys(players[player.room])[ii];
+        
+        var currentPlayer = players[player.room][i];
+        players[player.room][i].lastRank = rank
+			var $item = $(
+				"<li class='player' style='top:" + 60*(rank-1)+22 + "px;'>" + 
+          "<div class='rank'>" + currentPlayer.rank + "</div>" + 
+          "<div class='pfp'>" + '<img style="float: left;" src="' + currentPlayer.img + '" class="myimg" />' + "</div>" + 
+					"<div class='name'>" + currentPlayer.name + "</div>" +
+					"<div class='score'>" + currentPlayer.score  + "</div>" +
+        "</li>");
+      $list.append($item); 
+      //$(".player").eq(0).css("top", 22 + 60 + "px");
+      rank +=1;
+    }
+    for(var i=0; i < Object.keys(players[player.room]).length; i++){
+      var currentPlayer = players[player.room][Object.keys(players[player.room])[i]];
+      $(".player").eq(currentPlayer.lastRank-1).css("top", 22 +(currentPlayer.lastRank-1) * 60 + "px");
+    }
+  }else{
+    for(var i=0; i < Object.keys(players[player.room]).length; i++){
+      var currentPlayer = players[player.room][Object.keys(players[player.room])[i]];
+      $(".score").eq(currentPlayer.lastRank).text(currentPlayer.score);
+      $(".rank").eq(currentPlayer.lastRank).text(currentPlayer.rank);
+    }
+  }  
+    showScreen('leaderboardScreen');
+    setTimeout(function() { 
+    for(var i=0; i < Object.keys(players[player.room]).length; i++){
+      var currentPlayer = players[player.room][Object.keys(players[player.room])[i]];
+      $(".player").eq(currentPlayer.lastRank-1).css("top", 22 +(currentPlayer.rank-1) * 60 + "px");
+    }
+     }, 3000);
+    }
+
+
 function showScreen(id){
         var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen","leaderboardScreen"];
+        var d = new Date();
+        lastTime = d.getTime();
         zoomOut(1,id);
     }
 
@@ -489,8 +586,59 @@ function joinRoom(room){
       console.log("Kicked " +p);
       socket.emit('kick player', unescape(p));
   }
+
+  
   
   $(function () {
+
+    function readFile(file) {
+	var reader = new FileReader();
+	reader.onloadend = function () {
+		processFile(reader.result, file.type);
+	}
+	reader.onerror = function () {
+		alert('There was an error reading the file!');
+	}
+	reader.readAsDataURL(file);
+}
+
+function processFile(dataURL, fileType) {
+	var maxWidth = 800;
+	var maxHeight = 800;
+	var image = new Image();
+	image.src = dataURL;
+	image.onload = function () {
+		var width = image.width;
+		var height = image.height;
+		var shouldResize = (width > maxWidth) || (height > maxHeight);
+		if (!shouldResize) {
+			sendFile(dataURL);
+			return;
+		}
+		var newWidth;
+		var newHeight;
+		if (width > height) {
+			newHeight = height * (maxWidth / width);
+			newWidth = maxWidth;
+		} else {
+			newWidth = width * (maxHeight / height);
+			newHeight = maxHeight;
+		}
+		var canvas = document.createElement('canvas');
+		canvas.width = newWidth;
+		canvas.height = newHeight;
+		var context = canvas.getContext('2d');
+		context.drawImage(this, 0, 0, newWidth, newHeight);
+		dataURL = canvas.toDataURL(fileType);
+		sendFile(dataURL);
+  };
+  }
+  
+  function sendFile(fileData){
+    console.log(fileData);
+    socket.emit('submit answer',JSON.stringify(player),fileData,questions.pop());
+    nextQuestion();
+}
     function signin(e){
       e.preventDefault(); // prevents page reloading
       if ($('#m').val().length > 0){
@@ -526,12 +674,24 @@ function joinRoom(room){
     $('#answerButton').click(submitAnswer);
     $('#questionForm').submit(submitAnswer);
 
+    $('#answerImage').on('change', function (e) {
+		var file = e.target.files[0];
+
+		if (file) {
+			if (/^image\//i.test(file.type)) {
+				readFile(file);
+			} else {
+				alert('Not a valid image!');
+			}
+		}
+	});
+
     $('#leave').click(function(e){
       console.log("Leave" + socket.id);
       kickPlayer(socket.id);
     });
     $('#startGame').click(function(e){
-      socket.emit("start game",player.room);
+      socket.emit("start game",player.room,1);
     });
     
     function updateRooms(rooms){
@@ -552,9 +712,18 @@ function joinRoom(room){
     
     function nextQuestion(){
       showScreen("questionScreen")
-      
+      if(round==1){
+        document.getElementById("answer").style.display = ""; 
+        document.getElementById("answerImage").style.display = "none"; 
+      }else{
+        document.getElementById("answer").style.display = "none" 
+        document.getElementById("answerImage").style.display = ""; 
+      }
       if(questions.length>0){
-        document.getElementById("questionLabel").innerHTML = questions[questions.length-1];
+        setTimeout(function(){
+          document.getElementById("questionLabel").innerHTML = questions[questions.length-1];
+        },300);
+        
         if ($('#answer').val().length>0){
           $('#answer').val("");
         }
@@ -601,7 +770,6 @@ function joinRoom(room){
     
 
 	  socket.on('update players', function(p){
-      document.getElementById("playersOnline").innerHTML = "Players online: " +  p + "<br><br>" + JSON.stringify(player);
       players = JSON.parse(p);
       updateRooms(players);
       updateLobby(players);
@@ -614,18 +782,18 @@ function joinRoom(room){
        showScreen("selectRoomScreen");
       }
     });
-    socket.on("start game", function(room, qs){
+    socket.on("start game", function(room, qs, r){
       questions = qs[socket.id];
+      round = r;
+
       if(room = player.room){
         spaceBg.speedWhileLoading = 18;
         spaceBg.warp(300);
-        document.getElementById("playersOnline").innerHTML = questions;
-        setTimeout(function(){
-          nextQuestion();
-          bar.set(1.0);
-          bar.animate(0.0)
-			  },300)
+
       }
+      setTimeout(function(){
+          nextQuestion();
+			  },300)
     });
 
     $("#createroom").click(function(e){
@@ -643,45 +811,49 @@ function joinRoom(room){
         }
     });
 
+    
     socket.on('show leaderboard', function(){
-      var $list = $("#players");
-      player.room = "dog's room";
-      console.log(players[player.room]);
-      for (var i =0;i<5;i++){
-    var item = 
-				"<li class='player' style='top:" + 22*(i+1) + "px;'>" + 
-					"<div class='rank'>" + ( i) + "</div>" + 
-					"<div class='name'>" + 54 + "</div>" +
-					"<div class='score'>" + 0 + "</div>" +
-				"</li>"
-      $list.append(item)
-   }
-      var rank = 1
-      for(var i in players[player.room]) {
-        
-			var $item = $(
-				"<li class='player' style='top:" + 22*(rank) + "px;'>" + 
-					"<div class='rank'>" + rank + "</div>" + 
-					"<div class='name'>" + players[player.room][i].name + "</div>" +
-					"<div class='score'>" + 0 + "</div>" +
-        "</li>");
-        
-      $list.append($item); 
-      rank +=1;
-    }
-   
-    showScreen('leaderboardScreen');
-    });
+      leaderboard();
+  });
+    
 
     socket.on('show answers',function(question, answer1,answer2,p1,p2){
-      $('#frontText1').text(answer1);
-      $('#frontText2').text(answer2);
-      console.log(players);
-      console.log(p1);
+round = 2;
       $('#backName1').text(players[player.room][p1].name + "'s answer");
       $('#backName2').text(players[player.room][p2].name + "'s answer");
-      $('#backText1').text(answer1);
-      $('#backText2').text(answer2);
+      if(round==2){
+        document.getElementById('frontText1').style.display = "none";
+        document.getElementById('frontText2').style.display = "none";
+        document.getElementById('frontImage1').style.display = "";
+        document.getElementById('frontImage2').style.display = "";
+        setTimeout(function(){
+          c1data = answer1;
+          c2data = answer2;
+        setCanvasImage(document.getElementById("frontImage1"),answer1);
+        setCanvasImage(document.getElementById("frontImage2"),answer2);
+        },600)
+        $('#frontImage1').empty();
+        $('#frontImage1').append('<canvas width="100%" height="100%"></canvas>');
+        setCanvasImage(document.getElementById("frontImage1"),answer1);
+        $('#frontImage2').empty();
+        $('#frontImage2').append('<canvas width="100%" height="100%"></canvas>');
+        setCanvasImage(document.getElementById("frontImage2"),answer2);
+      }else{
+        $('#frontText1').text(answer1);
+        $('#frontText2').text(answer2);
+        $('#backText1').text(answer1);
+        $('#backText2').text(answer2);
+        document.getElementById('frontText1').style.display = "";
+        document.getElementById('frontText2').style.display = "";
+        document.getElementById('frontImage1').style.display = "none";
+        document.getElementById('frontImage2').style.display = "none";
+      }
+      
+      
+      console.log(players);
+      console.log(p1);
+      
+    
       $('#questionlab').text(question);
       showScreen("votingScreen");
       hasVoted = false;
@@ -708,12 +880,22 @@ function joinRoom(room){
         document.getElementById('rightcard').classList.toggle('flipped');
         },300)
       setTimeout(function(){
+        document.getElementById('frontText1').style.display = "";
+        document.getElementById('frontText2').style.display = "";
+        document.getElementById('frontImage1').style.display = "none";
+        document.getElementById('frontImage2').style.display = "none";
+        $("#frontText1").empty();
+        $("#frontText2").empty();
+        $("#frontText1").append( getPoints(v1,v2));
+        $("#frontText2").append( getPoints(v2,v1));
         document.getElementById('leftcard').classList.toggle('flipped');
         setTimeout(function(){
         document.getElementById('rightcard').classList.toggle('flipped');
         },300)
-      },3000)
+      },3500)
     });
+
+    
 
     function vote(card){
       if(!hasVoted){
@@ -735,7 +917,47 @@ function joinRoom(room){
       vote(2);
     });
   });
-
+  function setCanvasImage(canvasDiv, imgData){
+    var c = canvasDiv.childNodes[0]
+    var img = new Image();
+    img.onload = function() {
+        var hRatio = c.width / img.width    ;
+        var vRatio = c.height / img.height  ;
+        var ratio  = Math.min ( hRatio, vRatio );
+        var ctx = c.getContext("2d");
+        console.log("height1: ", hRatio);
+        console.log("width1:", vRatio);
+        console.log("height1-1: ", c.width );
+        console.log("width1=1:", c.height );
+        ctx.drawImage(img, 0,0, img.width, img.height, 0,0,img.width*ratio, img.height*ratio);
+    };
+    img.src =imgData;
+    fitToContainer(c,canvasDiv)
+}
+var c1data = -1;
+var c2data;
+var lastWidth =-1;
+setInterval(() => {
+  if(c1data != -1){
+    var div1 = document.getElementById("frontImage1");
+    if(div1.clientWidth!=lastWidth){
+      if(div1.childElementCount>0){
+        lastWidth=div1.clientWidth;
+      setCanvasImage(div1.childNodes[0],c1data);
+      setCanvasImage(document.getElementById("frontImage2").childNodes[0],c2data);
+      } 
+    }
+  }
+}, 50);
+function fitToContainer(canvas,theDiv){
+  canvas.width = theDiv.clientWidth;
+    canvas.height = theDiv.clientHeight;
+  if(theDiv.clientWidth==0){
+    canvas.width = 200;
+    canvas.height = 200;
+  }
+  
+}
 </script>
   <p id="playersOnline">test</p>
  </body>
