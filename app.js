@@ -116,11 +116,16 @@ function startGame(game,round){
       for (var i=0; i< allocation.length;i++){
         finalQuestions[ps[allocation[i]]].push(questions[i]);
         finalQuestions[ps[allocation2[i]]].push(questions[i]);
+        answers[game][questions[i]] = [] 
+        answers[game][questions[i]].push(["No Answer!",ps[allocation[i]]])
+        answers[game][questions[i]].push(["No Answer!",ps[allocation2[i]]])
+      
       }
+      console.log(answers)
       if(round==1){
-        countdownAnswers(45,game,round);
+        countdownAnswers(4,game,round);
       }else{
-        countdownAnswers(90,game,round);
+        countdownAnswers(4,game,round);
       }
      
       io.emit('start game', game, finalQuestions, round);
@@ -134,10 +139,13 @@ function startVoting(room,round){
   var qs = Object.keys(answers[room]);
   if (qs.length > 0){
     var q = qs[0];
-    answers[room][q][0][0] = ans;
-    answers[room][q][1][0] = ans;
+    if (round == 2){
+      answers[room][q][0][0] = ans;
+      answers[room][q][1][0] = ans;
+    }
+    console.log(answers[room][q],answers[room][q][0],answers[room][q][1])
     io.emit('show answers', q,answers[room][q][0][0],answers[room][q][1][0],answers[room][q][0][1],answers[room][q][1][1]);
-    countdownVotes(15,room,2);
+    countdownVotes(15,room,1);
   }else{
     setTimeout(function(){io.emit('show leaderboard')},3000);
     if(round<3){
@@ -174,6 +182,9 @@ function getPoints(v1,v2){
   var max = 2000;
   var total = v1.length + v2.length;
   var amount = Math.round((v1.length * max / total)/100)*100
+  if(total == 0){
+    amount = 0;
+  }
   return amount;
 }
 
@@ -242,7 +253,13 @@ io.on('connection', (socket) => {
     var player = JSON.parse(p);
     if(question != null){
       console.log(question);
-      answers[player.room][question].push([answer,socket.id]);
+      for (var i=0; i<answers[player.room][question].length/2;i++){
+          console.log(answers[player.room][question][i*2][1] + " " +  socket.id)
+          if(answers[player.room][question][i*2][1]==socket.id){
+            answers[player.room][question][i*2][0] = answer
+          }
+      }
+      //answers[player.room][question].push([answer,socket.id]);
       answers[player.room]["answersLeft"] = answers[player.room]["answersLeft"] - 1;
       console.log("Waiting for " + answers[player.room]["answersLeft"] + " answers");  
     }

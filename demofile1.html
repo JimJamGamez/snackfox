@@ -325,13 +325,13 @@ h1,h2,h3,h4,h5,h6{
             <section class="container" style="display: table-cell;" id="card1">
                 <div id="leftcard" class="card">
                   <figure class="front" id="front">
-                      <div class='resize' id="frontText1">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                      <div class='resize' id="frontText1"></div>
                       <div id="frontImage1"></div>
                   </figure>
                   <figure class="back" class="card">
-                      <div class='resize' id="backName1">Jamie's answer</div>
-                      <div class='resize' id="backText1">Eating poop out the toilet is very bad for your health lolololol</div>
-                      <div class='resize' id="votes1">Eating poop out the toilet is very bad for your health lolololol</div>
+                      <div class='resize' id="backName1"></div>
+                      <div class='resize' id="backText1"></div>
+                      <div class='resize' id="votes1"></div>
                   </figure>
                 </div>
               </section>
@@ -341,13 +341,13 @@ h1,h2,h3,h4,h5,h6{
               <section class="container" style="display: table-cell;" id="card2">
                   <div id="rightcard" class="card">
                     <figure class="front" id="front">
-                        <div class='resize' id="frontText2">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
-                        <div id="frontImage2">Eating poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health loling poop out the toilet is very bad for your health lolololol</div>
+                        <div class='resize' id="frontText2"></div>
+                        <div id="frontImage2"></div>
                     </figure>
                     <figure class="back">
-                        <div class='resize' id="backName2">Jamie's answer</div>
-                        <div class='resize' id="backText2">Eating poop out the toilet is very bad for your health lolololol</div>
-                        <div class='resize' id="votes2">Eating poop out the toilet is very bad for your health lolololol</div>
+                        <div class='resize' id="backName2"></div>
+                        <div class='resize' id="backText2"></div>
+                        <div class='resize' id="votes2"></div>
                     </figure>
                   </div>
                 </section>
@@ -459,24 +459,31 @@ function getPoints(v1,v2){
       var max = 2000;
       var total = v1.length + v2.length;
       var amount = Math.round((v1.length * max / total)/100)*100
+      if(total == 0){
+          amount = 0;
+      }
       var text = "+" + amount;
       if(v1.length==total){
         text += "<br>QUIPLOSH"
       }
+     
       return text;
     }
+
+var zoomSpeed = 0.004;
 function zoomOut(size,id){
   var d = new Date();
   var deltaTime =  d.getTime() - lastTime;
+  lastTime = d.getTime();
 
-  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","votingScreen"];
+  var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","waitingScreen","votingScreen","leaderboardScreen"];
   for(var i =0; i<screens.length;i++){
           //document.getElementById(screens[i]).style.display = "none";
           $("#" + screens[i]).css({"transform":"scale(" + size + ")","transition: transform":".2s"});
          
         }
   if(size>0.1){
-  setTimeout(zoomOut,1,size-0.0003*deltaTime,id);
+  setTimeout(zoomOut,1,size-zoomSpeed*deltaTime,id);
   }else{
     for(var i =0; i<screens.length;i++){
           document.getElementById(screens[i]).style.display = "none";      
@@ -489,6 +496,7 @@ function zoomOut(size,id){
 function zoomIn(size,id){
   var d = new Date();
   var deltaTime =  d.getTime() - lastTime;
+  lastTime = d.getTime();
   var screens = ["lobbyScreen","questionScreen","welcomeScreen","selectRoomScreen","waitingScreen","votingScreen","leaderboardScreen"];
   for(var i =0; i<screens.length;i++){
           //document.getElementById(screens[i]).style.display = "none";
@@ -503,9 +511,10 @@ function zoomIn(size,id){
     //fitToContainer(c,canvasDiv)
     var ctx = c.getContext("2d");
     //setCanvasImage(canvasDiv,c.get)
+   
     }
   if(size<1){
-    var final = size+0.0003*deltaTime;
+    var final = size+zoomSpeed*deltaTime;
     if(final > 1){
       final = 1;
     }
@@ -818,7 +827,7 @@ function processFile(dataURL, fileType) {
     
 
     socket.on('show answers',function(question, answer1,answer2,p1,p2){
-round = 2;
+//round = 2;
       $('#backName1').text(players[player.room][p1].name + "'s answer");
       $('#backName2').text(players[player.room][p2].name + "'s answer");
       if(round==2){
@@ -848,12 +857,9 @@ round = 2;
         document.getElementById('frontImage1').style.display = "none";
         document.getElementById('frontImage2').style.display = "none";
       }
+      $('#backText1').css("font-size","40px")
+      autoSizeText();
       
-      
-      console.log(players);
-      console.log(p1);
-      
-    
       $('#questionlab').text(question);
       showScreen("votingScreen");
       hasVoted = false;
