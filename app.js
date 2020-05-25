@@ -123,9 +123,9 @@ function startGame(game,round){
       }
       console.log(answers)
       if(round==1){
-        countdownAnswers(3,game,round);
+        countdownAnswers(90,game,round);
       }else{
-        countdownAnswers(3,game,round);
+        countdownAnswers(90,game,round);
       }
      
       io.emit('start game', game, finalQuestions, round);
@@ -140,8 +140,8 @@ function startVoting(room,round){
   if (qs.length > 0){
     var q = qs[0];
     if (round == 2){
-      answers[room][q][0][0] = ans;
-      answers[room][q][1][0] = ans;
+      //answers[room][q][0][0] = ans;
+      //answers[room][q][1][0] = ans;
     }
     console.log(answers[room][q],answers[room][q][0],answers[room][q][1])
     io.emit('show answers', q,answers[room][q][0][0],answers[room][q][1][0],answers[room][q][0][1],answers[room][q][1][1]);
@@ -149,7 +149,7 @@ function startVoting(room,round){
   }else{
     setTimeout(function(){io.emit('show leaderboard')},3000);
     if(round<3){
-      setTimeout(function(){startGame(room,round+1)},6000);
+      setTimeout(function(){startGame(room,round+1)},12000);
     }
   }
 } 
@@ -173,9 +173,9 @@ function countdownVotes(secondsLeft,room,round)
     console.log(answers[room][q][0][1] + " " + points1);
     console.log(answers[room][q][1][1] + " " + points2);
     delete answers[room][Object.keys(answers[room])[0]];
-    setTimeout(startVoting,5000,room,round);
+    setTimeout(startVoting,6000,room,round);
   }else{
-    setTimeout(countdownVotes, 1000,secondsLeft - 1,room,round);
+    setTimeout(countdownVotes, 2000,secondsLeft - 1,room,round);
   }
 }
 function getPoints(v1,v2){
