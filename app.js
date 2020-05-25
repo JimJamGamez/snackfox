@@ -123,9 +123,9 @@ function startGame(game,round){
       }
       console.log(answers)
       if(round==1){
-        countdownAnswers(4,game,round);
+        countdownAnswers(3,game,round);
       }else{
-        countdownAnswers(4,game,round);
+        countdownAnswers(3,game,round);
       }
      
       io.emit('start game', game, finalQuestions, round);

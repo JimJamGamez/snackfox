@@ -2,7 +2,6 @@
 <html>
   <head>
     <title>SnackFox</title>
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<style>
 
 body, html {
@@ -150,7 +149,14 @@ li {
   width:100vw;
 	height:100vh;
 }
-
+#progress {
+  margin: 20px;
+  width: 100px;
+  top:0px;
+  left:0px;
+  height: 100px;
+  position: relative;
+}
 @font-face {
     font-family: 'Lato';
     src: url('lato-black.woff') format('woff');
@@ -182,55 +188,72 @@ h1,h2,h3,h4,h5,h6{
   position: relative;
   perspective: 800px;
 }
-.flip-card {
-  background-color: transparent;
-  width: 100%;
-  height: 70vh;
-  padding-bottom: 20px;
-  perspective: 1000px;
-  
-}
 
-.flip-card-inner {
-  position: relative;
+.card {
   width: 100%;
   height: 100%;
-  text-align: center;
-  transition: transform 0.6s;
+  padding: 0px;
+  position: absolute;
   transform-style: preserve-3d;
-  box-shadow: 0 4px 8px 0 rgba(255,255,255,0.15);
-  border-color: #C1E0FF;
-  border-width:0px;
-  border-style:solid;
+  transition: transform 1s;
 }
 
-.flip-card.flipped, .flip-card-inner.flipped{
-  transform: rotateY(180deg);
-}
-.flip-card-front, .flip-card-back {
+.card figure {
+  margin: 0;
+  display: block;
   position: absolute;
   width: 100%;
   height: 100%;
-  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-.flip-card-front {
-  color: black;
-  background-color: white;
+.card .front {
+  background: #FFFFF0;
+  display: flex;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
-.flip-card-back {
-  
-  color: black;
-   background-color: white;
-  transform: rotateY(180deg);
+.card .back {
+  background: #FFFFF0;
+  border-radius: 25px;
+  transform: rotateY( 180deg);
+}
+
+.card.flipped {
+  transform: rotateY( 180deg);
+}
+#frontText1,#frontText2{
+    max-height: 100%;
+    font-size: 40px;
+}
+#frontImage1,#frontImage2{
+  width:90%;
+  height:90%;
+}
+#backText1, #backText2 #backImage1 #backImage2{
+    height: 40%;
+    font-size: 40px;
+}
+#backName1,#backName2{
+    height: 20%;
+    font-size: 40px;
 }
 #votes1,#votes2{
     height: 40%;
     font-size: 20px;
 }
-
+.no-resize, .resize {
+  width: 90%;
+    height:90%;
+    color: #111;
+   
+    text-align: center;
+    display: inline-block
+}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1" /> 
   </head>
@@ -296,55 +319,47 @@ h1,h2,h3,h4,h5,h6{
   
   <h1 id="questionlab" style="font-size:3vw;"></h1>
   <br>
-  <div style="width:100%;height:100px;" class="w3-row">
-    <div class="w3-col w3-container m6 l6">
-    <div class="flip-card" >
-      <div class="flip-card-inner" id="card1">
-        <div class="flip-card-front">
-        <div class="resize" style="font-size: 50px; height: 90%"><div>His is a test adsf dsfa dssad asdfasdf ad sdf afsd</div></div> 
-        <div id="canvas1" style="height: 100%; width:100%"></div>
-      </div>
-        <div class="flip-card-back">
-          <div class="resize" style="height: 15%"><div>Jamie's answer</div></div>
-          <div class="resize" style="height: 40%"><div>Add something really funny here</div></div>
-          <div style="height: 40%; width:100%"><div>
-            <table style="height: 100%; width:100%">
-              <tr>    
-                <td style="height: 50px; width:50px"><img class="myimg" src="https://lh3.googleusercontent.com/pw/ACtC-3d-1s__srqgZ3k_mQtRGPUu0lvZWOjOdbjlQ7oSv3w824UFasx_wSOukl_JyaTZlguxabrOxJH1UGjsxdfhIHl4JKcfck-MuALKKMlUv4b9xwj2ofD_myh5m8ugQlJcht9-nhxfsUPAIgyJPoYVsMCz7Q=w486-h647-no"/></td>
-                <td style="text-align:left; font-size: 20px; padding-left: 10px;">test</td>
-              </tr>
-            </table>
-          </div></div>
+  <div style="width: 100%; height:60%; display: table;">
+        <div style="display: table-row">
+          <section class="container" style="display: table-cell; width: 2.5%;"></section>
+            <section class="container" style="display: table-cell;" id="card1">
+                <div id="leftcard" class="card">
+                  <figure class="front" id="front">
+                      <div class='resize' id="frontText1"></div>
+                      <div id="frontImage1"></div>
+                  </figure>
+                  <figure class="back" class="card">
+                      <div class='resize' id="backName1"></div>
+                      <div class='resize' id="backText1"></div>
+                      <div class='resize' id="votes1"></div>
+                  </figure>
+                </div>
+              </section>
+              <section class="container" style="display: table-cell; width: 5%;">
+                
+              </section>
+              <section class="container" style="display: table-cell;" id="card2">
+                  <div id="rightcard" class="card">
+                    <figure class="front" id="front">
+                        <div class='resize' id="frontText2"></div>
+                        <div id="frontImage2"></div>
+                    </figure>
+                    <figure class="back">
+                        <div class='resize' id="backName2"></div>
+                        <div class='resize' id="backText2"></div>
+                        <div class='resize' id="votes2"></div>
+                    </figure>
+                  </div>
+                </section>
+                <section class="container" style="display: table-cell; width: 2.5%;"></section>
+               
         </div>
-      </div>
+        
     </div>
-    </div>
-    <div class="w3-col w3-container m6 l6">
-      <div class="flip-card" >
-        <div class="flip-card-inner" id="card2"> 
-          <div class="flip-card-front">
-          <div class="resize" style="font-size: 50px; height: 90%"><div>His is a test adsf dsfa dssad asdfasdf ad sdf afsd</div></div> 
-          <div id="c2" style="height: 100%; width:100%"></div>
-        </div>
-          <div class="flip-card-back">
-            <div class="resize" style="height: 15%"><div>Jamie's answer</div></div>
-            <div class="resize" style="height: 40%"><div>Add something really funny here</div></div>
-            <div style="height: 40%; width:100%"><div>
-              <table style="height: 100%; width:100%">
-                <tr>    
-                  <td style="height: 50px; width:50px"><img class="myimg" src="https://lh3.googleusercontent.com/pw/ACtC-3d-1s__srqgZ3k_mQtRGPUu0lvZWOjOdbjlQ7oSv3w824UFasx_wSOukl_JyaTZlguxabrOxJH1UGjsxdfhIHl4JKcfck-MuALKKMlUv4b9xwj2ofD_myh5m8ugQlJcht9-nhxfsUPAIgyJPoYVsMCz7Q=w486-h647-no"/></td>
-                  <td style="text-align:left; font-size: 20px; padding-left: 10px;">test</td>
-                </tr>
-              </table>
-            </div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+
+ </div>
 </div>
-
-
+<div id="progress" style='display:none;'>
 </div>
 <script>
   var card = document.getElementById('leftcard');
@@ -357,83 +372,40 @@ autoSizeText();
 	<script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
   <script>
-
-
-function getCard(num){
-  return $(".flip-card")[num]
-}
-
-function addVote(num,player){
- var voteDiv = getCard(num).firstElementChild.children[1].children[2].firstElementChild.firstElementChild.firstElementChild;
-  var data = "<tr>"
-    data+= '<td style="height: 50px; width:50px"><img class="myimg" src="https://lh3.googleusercontent.com/pw/ACtC-3d-1s__srqgZ3k_mQtRGPUu0lvZWOjOdbjlQ7oSv3w824UFasx_wSOukl_JyaTZlguxabrOxJH1UGjsxdfhIHl4JKcfck-MuALKKMlUv4b9xwj2ofD_myh5m8ugQlJcht9-nhxfsUPAIgyJPoYVsMCz7Q=w486-h647-no"/></td>'
-    data+= '<td style="text-align:left; font-size: 20px; padding-left: 10px;">' + player +'</td>'
-    data += "</tr>"
-    voteDiv.innerHTML += data
- autoSizeText();
-}
-
-function clearVotes(num){
-  var voteDiv = getCard(num).firstElementChild.children[1].children[2].firstElementChild.firstElementChild.firstElementChild;
-  voteDiv.innerHTML = "";
-}
-
-function flip(num){
-  var p1 = $(".flip-card-inner")[num]
- // p.classList.toggle("flipped");
-  p1.classList.t
-
-}
     var autoSizeText;
 autoSizeText = function() {
-var el, elements, _i, _len, _results;
-elements = $('.resize');
-if (elements.length < 0) {
-  return;
-}
-_results = [];
-for (_i = 0, _len = elements.length; _i < _len; _i++) {
-  el = elements[_i];
-
-  _results.push((function(el) {
-    var resizeText, _results1;
-   var maxSize = 70;
-    resizeText = function() {
-      var elNewFontSize;
-      if(el.firstChild.offsetHeight > el.offsetHeight){
-        elNewFontSize = (parseInt($(el.firstChild).css('font-size').slice(0, -2)) - 1) + 'px';
-      }else{
-        elNewFontSize = (parseInt($(el.firstChild).css('font-size').slice(0, -2)) + 1) + 'px';
+  var el, elements, _i, _len, _results;
+  elements = $('.resize');
+  console.log(elements);
+  if (elements.length < 0) {
+    return;
+  }
+  _results = [];
+  for (_i = 0, _len = elements.length; _i < _len; _i++) {
+    el = elements[_i];
+    _results.push((function(el) {
+      var resizeText, _results1;
+      resizeText = function() {
+        var elNewFontSize;
+        elNewFontSize = (parseInt($(el).css('font-size').slice(0, -2)) - 1) + 'px';
+        return $(el).css('font-size', elNewFontSize);
+      };
+      _results1 = [];
+      while (el.scrollHeight > el.offsetHeight) {
+        _results1.push(resizeText());
       }
-      if (parseInt($(el.firstChild).css('font-size').slice(0, -2)) > maxSize){
-        return $(el).css('font-size', maxSize + "px");
-      }
-      return $(el).css('font-size', elNewFontSize);
-    };
-    _results1 = [];
-  var count = 0;
-  var dir1 = 0
-  var dir2 = 0;
-    while (count < 50 && dir1 == dir2) {
-     // console.log((el.firstChild.offsetHeight -el.offsetHeight)*(el.firstChild.offsetHeight -el.offsetHeight))
-      var dir1 = el.firstChild.offsetHeight > el.offsetHeight;
-     _results1.push(resizeText());
-     var dir2 = el.firstChild.offsetHeight > el.offsetHeight;
-     //console.log(dir1 == dir2);
-     count+=1;
-    }
-    _results1.push(resizeText());
-     return _results1;
-  })(el));
-}
-return _results;
+       return _results1;
+    })(el));
+  }
+  return _results;
 };
 
 $(document).ready(function() {
-
-return autoSizeText();
+  
+  return autoSizeText();
 });
-
+</script>
+<script>
 var player = {name: "hello",room: "", isHost:false, score:0,img:"",lastRank:-1};
 var round = 1;
  var socket = io();
@@ -501,7 +473,7 @@ function zoomIn(size,id){
         }
 
 
-    /*var canvasDiv = document.getElementById("frontImage1")
+    var canvasDiv = document.getElementById("frontImage1")
     if(canvasDiv.childElementCount>0){
     var c = canvasDiv.childNodes[0]
     console.log("test2",c);
@@ -509,7 +481,7 @@ function zoomIn(size,id){
     var ctx = c.getContext("2d");
     //setCanvasImage(canvasDiv,c.get)
    
-    }*/
+    }
   if(size<1){
     var final = size+zoomSpeed*deltaTime;
     if(final > 1){
@@ -697,7 +669,7 @@ function processFile(dataURL, fileType) {
       kickPlayer(socket.id);
     });
     $('#startGame').click(function(e){
-      socket.emit("start game",player.room,2);
+      socket.emit("start game",player.room,1);
     });
     
     function updateRooms(rooms){
@@ -825,7 +797,6 @@ function processFile(dataURL, fileType) {
 
     socket.on('show answers',function(question, answer1,answer2,p1,p2){
 //round = 2;
-/*
       $('#backName1').text(players[player.room][p1].name + "'s answer");
       $('#backName2').text(players[player.room][p2].name + "'s answer");
       if(round==2){
@@ -862,19 +833,8 @@ function processFile(dataURL, fileType) {
       showScreen("votingScreen");
       hasVoted = false;
       autoSizeText();
-      */
-      hasVoted = false;
-     $("#card1").css({"border-width":"0px"})
+      $("#card1").css({"border-width":"0px"})
       $("#card2").css({"border-width":"0px"})
-      showScreen("votingScreen");
-      if(round==2){
-        setImage(0,answer1,players[player.room][p1].name)
-        setImage(1,answer2,players[player.room][p2].name)
-      }else{
-      setAnswer(0,answer1,players[player.room][p1].name)
-      setAnswer(1,answer2,players[player.room][p2].name)
-      }
-      autoSizeText();
     });
 
     socket.on("display votes",function(v10,v20){
@@ -882,40 +842,30 @@ function processFile(dataURL, fileType) {
       var v1 = JSON.parse(v10);
       var v2 = JSON.parse(v20);
       autoSizeText();
-      /*$('#votes1').empty();
-      $('#votes2').empty();*/
-      clearVotes(0)
-      clearVotes(1)
+      $('#votes1').empty();
+      $('#votes2').empty();
       for (var p in v1){
-        //$('#votes1').append(players[player.room][v1[p]].name  + "<br>")
-        addVote(0,players[player.room][v1[p]])
+        $('#votes1').append(players[player.room][v1[p]].name  + "<br>")
       }
       for (var p in v2){
-        //$('#votes2').append(players[player.room][v2[p]].name  + "<br>")
-        addVote(1,players[player.room][v2[p]])
+        $('#votes2').append(players[player.room][v2[p]].name  + "<br>")
       }
-      flip(0)
-      //document.getElementById('leftcard').classList.toggle('flipped');
+      document.getElementById('leftcard').classList.toggle('flipped');
       setTimeout(function(){
-        flip(1)
-        //document.getElementById('rightcard').classList.toggle('flipped');
+        document.getElementById('rightcard').classList.toggle('flipped');
         },300)
       setTimeout(function(){
-        /*document.getElementById('frontText1').style.display = "";
+        document.getElementById('frontText1').style.display = "";
         document.getElementById('frontText2').style.display = "";
         document.getElementById('frontImage1').style.display = "none";
         document.getElementById('frontImage2').style.display = "none";
         $("#frontText1").empty();
         $("#frontText2").empty();
         $("#frontText1").append( getPoints(v1,v2));
-        $("#frontText2").append( getPoints(v2,v1));*/
-        setAnswer(0,getPoints(v1,v2))
-        setAnswer(1,getPoints(v2,v1))
-        //document.getElementById('leftcard').classList.toggle('flipped');
-        flip(0)
+        $("#frontText2").append( getPoints(v2,v1));
+        document.getElementById('leftcard').classList.toggle('flipped');
         setTimeout(function(){
-          flip(1)
-        //document.getElementById('rightcard').classList.toggle('flipped');
+        document.getElementById('rightcard').classList.toggle('flipped');
         },300)
       },3500)
     });
@@ -959,102 +909,21 @@ function processFile(dataURL, fileType) {
     img.src =imgData;
     fitToContainer(c,canvasDiv)
 }
-function setAnswer(num,ans,name){
-  
-  $(".flip-card-front")[num].firstElementChild.hidden = false;
-  $(".flip-card-front")[num].lastElementChild.hidden = true;
- var card = getCard(num).firstElementChild;
- var front = card.firstElementChild.firstElementChild.firstElementChild;
- front.innerHTML = ans;
- if(name){
-  var backName = card.lastElementChild.firstElementChild.firstElementChild;
-  backName.innerText = name + "'s answer";
-  var backAns = card.lastElementChild.children[1].firstElementChild;
-  backAns.innerText = ans;
- }
- autoSizeText();
- cdata[num] = -1; 
-}
-
-function setImage(num,ans,name){
-  $(".flip-card-front")[num].firstElementChild.hidden = true;
-  $(".flip-card-front")[num].lastElementChild.hidden = false;
-  var card = getCard(num).firstElementChild;
-  var backName = card.lastElementChild.firstElementChild.firstElementChild;
-  backName.innerText = name + "'s answer";
-  var backAns = card.lastElementChild.children[1].firstElementChild;
-  backAns.innerText = "";
-  var div =  $(".flip-card-front")[num].lastElementChild;
-  div.innerHTML= ('<canvas width="200%" height="200%"></canvas>');
-  setCanvasImage(div,ans);
-  cdata[num] = ans; 
-}
-
-function setCanvasImage(canvasDiv, imgData){
-    var c = canvasDiv.firstElementChild
-    
-    var img = new Image();
-    img.onload = function() {
-      c.width = canvasDiv.offsetWidth;
-    c.height = canvasDiv.offsetHeight;
-        var hRatio = c.width / img.width    ;
-        var vRatio = c.height / img.height  ;
-        var ratio  = Math.min (hRatio, vRatio);
-        var ctx = c.getContext("2d");
-        ctx.drawImage(img, 0,0, img.width, img.height, 0,0,Math.ceil(img.width*ratio), Math.ceil(img.height*ratio));
-    };
-    img.src =imgData;
-     
-    //fitToContainer(c,canvasDiv)
-}
-
-var cdata = [-1,-1];
+var c1data = -1;
+var c2data;
 var lastWidth =-1;
 setInterval(() => {
-  
-    var div1 = $(".flip-card-front")[0];
+  if(c1data != -1){
+    var div1 = document.getElementById("frontImage1");
     if(div1.clientWidth!=lastWidth){
       if(div1.childElementCount>0){
         lastWidth=div1.clientWidth;
-        console.log("Resize canvas")
-        if(cdata[0] != -1){
-          console.log("Resize canvas 1")
-          setCanvasImage($(".flip-card-front")[0].lastElementChild,cdata[0]);
-        }
-        if(cdata[1]!=-1){
-          console.log("Resize canvas 2")
-          setCanvasImage($(".flip-card-front")[1].lastElementChild,cdata[1]);
-        }
-      //setCanvasImage(document.getElementById("frontImage2").childNodes[0],c2data);
+      setCanvasImage(div1.childNodes[0],c1data);
+      setCanvasImage(document.getElementById("frontImage2").childNodes[0],c2data);
       } 
     }
-  
+  }
 }, 50);
-
-function getCard(num){
-  return $(".flip-card")[num]
-}
-
-function addVote(num,player){
- var voteDiv = getCard(num).firstElementChild.children[1].children[2].firstElementChild.firstElementChild.firstElementChild;
-  var data = "<tr>"
-    data+= '<td style="height: 50px; width:50px"><img class="myimg" src="'+  player.img + '"/></td>'
-    data+= '<td style="text-align:left; font-size: 20px; padding-left: 10px;">' + player.name +'</td>'
-    data += "</tr>"
-    voteDiv.innerHTML += data
- autoSizeText();
-}
-
-function clearVotes(num){
-  var voteDiv = getCard(num).firstElementChild.children[1].children[2].firstElementChild.firstElementChild.firstElementChild;
-  voteDiv.innerHTML = "";
-}
-
-function flip(num){
-  var p1 = $(".flip-card-inner")[num]
- // p.classList.toggle("flipped");
-  p1.classList.toggle("flipped");
-}
 function fitToContainer(canvas,theDiv){
   canvas.width = theDiv.clientWidth;
     canvas.height = theDiv.clientHeight;
